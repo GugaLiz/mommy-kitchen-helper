@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "recipe-card": "/components/recipe-card/index",
+    "section-card": "/components/section-card/index"
+  },
+  "navigationBarTitleText": "今日推荐"
+}

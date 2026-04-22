@@ -1,0 +1,11 @@
+<view class="panel recipe-card" bindtap="handleTap">
+  <view class="recipe-cover hero-gradient">{{recipe.imageText}}</view>
+  <view class="recipe-main">
+    <view class="recipe-title">{{recipe.name}}</view>
+    <view class="recipe-meta">{{recipe.ageLabel}} · {{recipe.cookingTime}}分钟 · {{recipe.primaryTag}}</view>
+    <view class="recipe-tags">
+      <text class="tag" wx:for="{{recipe.tags}}" wx:key="*this">{{item}}</text>
+    </view>
+  </view>
+  <view class="collect-mark" wx:if="{{recipe.isCollected}}">已收藏</view>
+</view>

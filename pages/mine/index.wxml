@@ -1,0 +1,54 @@
+<view class="page-shell safe-bottom">
+  <view class="panel profile-card" bindtap="openProfileEditor">
+    <image class="profile-avatar" src="{{user.avatarImage}}" mode="aspectFill" />
+    <view>
+      <view class="profile-name">{{user.nickname}}</view>
+      <view class="muted">{{user.bio || '点击补充个人说明'}}</view>
+    </view>
+  </view>
+
+  <section-card title="我的宝宝">
+    <view class="baby-item" wx:for="{{babies}}" wx:key="id" data-id="{{item.id}}" bindtap="editBaby">
+      <view>
+        <view class="baby-item-title">{{item.nickname}} · {{item.gender}} · {{item.ageText}}</view>
+        <view class="muted">过敏：{{item.allergyText}}</view>
+        <view class="muted">偏好：{{item.preferenceText}}</view>
+      </view>
+      <view class="edit-pill">编辑</view>
+    </view>
+    <button class="secondary-btn add-btn center-btn" bindtap="createBaby">+ 添加宝宝</button>
+  </section-card>
+
+  <section-card title="设置">
+    <view class="setting-row">
+      <text>长辈模式</text>
+      <switch color="#FFA926" checked="{{user.elderMode}}" bindchange="toggleElderMode" />
+    </view>
+    <view class="setting-link" bindtap="showCacheNotice">清除缓存</view>
+    <view class="setting-link" bindtap="showFeedback">意见反馈</view>
+    <view class="setting-link" bindtap="showAbout">关于我们</view>
+  </section-card>
+
+  <view class="modal-mask" wx:if="{{showProfileEditor}}" bindtap="closeProfileEditor"></view>
+
+  <view class="floating-sheet profile-sheet" wx:if="{{showProfileEditor}}">
+    <view class="row-between">
+      <view class="section-title">编辑个人资料</view>
+      <view bindtap="closeProfileEditor">关闭</view>
+    </view>
+    <view class="profile-editor-avatar" bindtap="chooseAvatar">
+      <image class="profile-editor-image" src="{{profileForm.avatarImage}}" mode="aspectFill" />
+      <view class="muted profile-editor-tip">点击上传头像</view>
+      <view class="muted profile-editor-subtip">支持上传，裁剪能力可在下一版继续细化</view>
+    </view>
+    <view class="profile-editor-item" bindtap="editNickname">
+      <text>昵称</text>
+      <text class="muted">{{profileForm.nickname || '点击填写'}}</text>
+    </view>
+    <view class="profile-editor-item" bindtap="editBio">
+      <text>个人说明</text>
+      <text class="muted">{{profileForm.bio || '点击填写'}}</text>
+    </view>
+    <button class="primary-btn center-btn profile-save-btn" bindtap="saveProfile">保存资料</button>
+  </view>
+</view>

@@ -1,0 +1,45 @@
+.edit-panel {
+  padding: 28rpx;
+}
+
+.field {
+  margin-top: 28rpx;
+}
+
+.picker-input {
+  display: flex;
+  align-items: center;
+  color: #333333;
+}
+
+.add-row {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.add-input {
+  flex: 1;
+}
+
+.add-chip {
+  background: #fff7ee;
+  border: 2rpx dashed #ffc979;
+  color: #c66c25;
+}
+
+.mini-btn {
+  width: 148rpx;
+  flex-shrink: 0;
+}
+
+.save-btn {
+  margin-top: 36rpx;
+}
+
+.center-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}

@@ -1,0 +1,123 @@
+.home-head {
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+}
+
+.baby-block {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.baby-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 10rpx 24rpx rgba(71, 49, 29, 0.08);
+  overflow: hidden;
+}
+
+.baby-name {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.baby-meta {
+  margin-top: 10rpx;
+  color: #7d6d61;
+  font-size: 24rpx;
+}
+
+.meal-card {
+  padding: 24rpx;
+  border-radius: 28rpx;
+  margin-bottom: 16rpx;
+}
+
+.breakfast {
+  background: #fff6e8;
+}
+
+.lunch {
+  background: #fff0e7;
+}
+
+.dinner {
+  background: #edf9f4;
+}
+
+.meal-title {
+  font-size: 24rpx;
+  color: #8a8177;
+}
+
+.meal-name {
+  margin-top: 12rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.meal-meta {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #8a8177;
+}
+
+.swap-pill {
+  border: 2rpx solid rgba(255, 169, 38, 0.28);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8rpx 18rpx rgba(198, 108, 37, 0.08);
+}
+
+.plan-strip {
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+}
+
+.strip-btn {
+  width: 200rpx;
+  margin: 0;
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18rpx;
+}
+
+.quick-item {
+  padding: 28rpx 18rpx;
+  text-align: center;
+  border-radius: 26rpx;
+  background: #fff4e5;
+  color: #a8601a;
+  font-weight: 700;
+}
+
+.empty-inline {
+  text-align: center;
+  padding: 18rpx 0 8rpx;
+}
+
+.empty-inline-image {
+  width: 200rpx;
+  height: 200rpx;
+  margin: 0 auto;
+}
+
+.empty-inline-title {
+  margin-top: 6rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.empty-inline-desc {
+  margin-top: 8rpx;
+  color: #8a8177;
+  line-height: 1.7;
+}

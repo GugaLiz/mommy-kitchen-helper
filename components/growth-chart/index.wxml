@@ -1,0 +1,85 @@
+<view class="panel chart-shell" wx:if="{{chartData}}">
+  <view class="chart-title">{{chartData.title}}（{{chartData.unit}}）</view>
+  <view class="chart-main">
+    <view class="y-axis">
+      <view
+        class="y-tick"
+        wx:for="{{chartData.yTicks}}"
+        wx:key="label"
+        style="bottom: {{item.bottom}};"
+      >
+        {{item.label}}
+      </view>
+    </view>
+
+    <view class="chart-area">
+      <view
+        class="grid-line"
+        wx:for="{{chartData.yTicks}}"
+        wx:key="label"
+        style="bottom: {{item.bottom}};"
+      ></view>
+
+      <view
+        class="band-column"
+        wx:for="{{chartData.bandColumns}}"
+        wx:key="index"
+        style="left: {{item.left}}; bottom: {{item.bottom}}; width: {{item.width}}; height: {{item.height}};"
+      ></view>
+
+      <block wx:for="{{chartData.references}}" wx:key="key" wx:for-item="series">
+        <view
+          class="line-segment {{series.className}}"
+          wx:for="{{series.segments}}"
+          wx:for-item="segment"
+          wx:key="index"
+          style="left: {{segment.left}}; bottom: {{segment.bottom}}; width: {{segment.width}}; transform: {{segment.angle}};"
+        ></view>
+        <view
+          class="curve-tag {{series.className}}"
+          style="left: {{series.tagPoint.left}}; bottom: {{series.tagPoint.bottom}};"
+        >
+          {{series.label}}
+        </view>
+      </block>
+
+      <view
+        class="line-segment actual-line"
+        wx:for="{{chartData.actual.segments}}"
+        wx:key="index"
+        style="left: {{item.left}}; bottom: {{item.bottom}}; width: {{item.width}}; transform: {{item.angle}};"
+      ></view>
+
+      <view
+        class="actual-point"
+        wx:for="{{chartData.actual.points}}"
+        wx:key="measuredDate"
+        style="left: {{item.left}}; bottom: {{item.bottom}};"
+      >
+        <view class="point-dot {{index === chartData.actual.points.length - 1 ? 'is-latest' : ''}}"></view>
+      </view>
+
+      <view
+        class="latest-marker"
+        wx:if="{{chartData.latestMarker}}"
+        style="left: {{chartData.latestMarker.left}};"
+      >
+        <view class="latest-line"></view>
+        <view class="latest-badge">{{chartData.latestMarker.label}}</view>
+      </view>
+
+      <view class="x-axis">
+        <view
+          class="x-tick"
+          wx:for="{{chartData.xTicks}}"
+          wx:key="label"
+          style="left: {{item.left}};"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="chart-foot muted">根据《世卫组织儿童生长标准》计算，当前约位于：{{percentileText}}</view>
+</view>

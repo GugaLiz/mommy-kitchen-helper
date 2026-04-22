@@ -1,0 +1,216 @@
+{
+  "info": {
+    "name": "Mommy Kitchen Helper Auth API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Auth API smoke tests for local backend"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "wxCode",
+      "value": "replace_with_wx_login_code"
+    },
+    {
+      "key": "nickname",
+      "value": "测试用户"
+    },
+    {
+      "key": "devOpenid",
+      "value": "dev_openid_demo_001"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth - Dev Login (No WeChat)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"openid\": \"{{devOpenid}}\",\n  \"nickname\": \"{{nickname}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/dev-login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "dev-login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "pm.test('response has token', function () {",
+              "  pm.expect(json).to.have.property('code');",
+              "  pm.expect(json).to.have.property('data');",
+              "  pm.expect(json.data).to.have.property('token');",
+              "});",
+              "",
+              "if (json && json.data && json.data.token) {",
+              "  pm.collectionVariables.set('token', json.data.token);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - WeChat Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"{{wxCode}}\",\n  \"userInfo\": {\n    \"nickName\": \"{{nickname}}\",\n    \"avatarUrl\": \"https://example.com/avatar.png\",\n    \"phoneNumber\": \"13800000000\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/wechat-login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "wechat-login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "pm.test('response has token', function () {",
+              "  pm.expect(json).to.have.property('code');",
+              "  pm.expect(json).to.have.property('data');",
+              "  pm.expect(json.data).to.have.property('token');",
+              "});",
+              "",
+              "if (json && json.data && json.data.token) {",
+              "  pm.collectionVariables.set('token', json.data.token);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Get Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "profile"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "pm.test('profile exists', function () {",
+              "  pm.expect(json).to.have.property('code');",
+              "  pm.expect(json).to.have.property('data');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "logout"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "pm.test('logout success payload', function () {",
+              "  pm.expect(json).to.have.property('code');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

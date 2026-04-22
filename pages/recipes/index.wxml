@@ -1,0 +1,34 @@
+<view class="page-shell safe-bottom">
+  <view class="panel search-panel" wx:if="{{listMode === 'all'}}">
+    <input class="search-input" placeholder="搜索食谱，如 番茄 / 补铁 / 蒸蛋" confirm-type="search" bindinput="handleKeyword" />
+  </view>
+
+  <view class="panel filter-panel" wx:if="{{listMode === 'all'}}">
+    <view class="filter-title">月龄筛选</view>
+    <view class="chip-row">
+      <view class="chip {{ageRange === item ? 'active' : ''}}" wx:for="{{ageRanges}}" wx:key="*this" data-value="{{item}}" bindtap="selectAge">{{item}}</view>
+    </view>
+    <view class="filter-title second">功效标签</view>
+    <view class="chip-row">
+      <view class="chip {{tag === item ? 'active' : ''}}" wx:for="{{tags}}" wx:key="*this" data-value="{{item}}" bindtap="selectTag">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="panel mode-panel" wx:if="{{listMode !== 'all'}}">
+    <view class="mode-header">
+      <view>
+        <view class="mode-title">{{pageTitle}}</view>
+        <view class="mode-subtitle">{{pageSubtitle}}</view>
+      </view>
+      <view class="back-chip" bindtap="backToAll">全部食谱</view>
+    </view>
+  </view>
+
+  <view class="muted result-hint">共找到 {{recipes.length}} 道食谱</view>
+  <recipe-card wx:for="{{recipes}}" wx:key="id" recipe="{{item}}" bindtapcard="goDetail" />
+  <view class="empty-inline" wx:if="{{recipes.length === 0}}">
+    <image class="empty-inline-image" src="/assets/illustrations/empty-recipes.svg" mode="aspectFit" />
+    <view class="empty-inline-title">{{listMode === 'collection' ? '还没有收藏食谱' : (listMode === 'made' ? '还没有做过食谱' : '还没有符合条件的食谱')}}</view>
+    <view class="empty-inline-desc">{{listMode === 'all' ? '换个关键词或筛选条件试试，我们正在持续补充内容。' : '去食谱详情页点一点，首页这里就能直接查看啦。'}}</view>
+  </view>
+</view>

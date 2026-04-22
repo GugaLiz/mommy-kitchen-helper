@@ -1,0 +1,60 @@
+<view class="page-shell safe-bottom" wx:if="{{recipe.id}}">
+  <view class="panel detail-cover hero-gradient">
+    <view class="cover-emoji">{{recipe.imageText}}</view>
+  </view>
+
+  <view class="detail-title">{{recipe.name}}</view>
+  <view class="detail-meta">★ {{recipe.rating}} · {{recipe.madeCount}}人做过 · {{recipe.cookingTime}}分钟</view>
+  <view class="detail-tag-list">
+    <text class="tag">{{recipe.ageLabel}}</text>
+    <text class="tag" wx:for="{{recipe.tags}}" wx:key="*this">{{item}}</text>
+  </view>
+
+  <view class="panel detail-card">
+    <view class="detail-section-title">
+      <image class="section-icon" src="/assets/icons/ingredients.svg" mode="aspectFit" />
+      <text>食材清单</text>
+    </view>
+    <view class="line-item" wx:for="{{recipe.ingredients}}" wx:key="name">
+      <text>{{item.name}}</text>
+      <text class="muted">{{item.quantity}}</text>
+    </view>
+  </view>
+
+  <view class="panel detail-card">
+    <view class="detail-section-title">
+      <image class="section-icon" src="/assets/icons/steps.svg" mode="aspectFit" />
+      <text>制作步骤</text>
+    </view>
+    <view class="step-item" wx:for="{{recipe.steps}}" wx:key="index">
+      <text class="step-index">{{index + 1}}</text>
+      <text class="step-text">{{item}}</text>
+    </view>
+    <view class="video-link">{{recipe.videoLabel}}</view>
+  </view>
+
+  <view class="panel detail-card">
+    <view class="detail-section-title">
+      <image class="section-icon" src="/assets/icons/tips.svg" mode="aspectFit" />
+      <text>小贴士</text>
+    </view>
+    <view class="muted">{{recipe.tips}}</view>
+    <view class="detail-section-title sub">
+      <image class="section-icon" src="/assets/icons/nutrition.svg" mode="aspectFit" />
+      <text>营养分析</text>
+    </view>
+    <view class="muted">{{recipe.nutrition}}</view>
+  </view>
+
+  <view class="action-row">
+    <button class="secondary-btn collect-btn center-btn" bindtap="toggleCollect">{{collectText}}</button>
+    <button class="primary-btn done-btn center-btn" bindtap="markDone">我做过了</button>
+  </view>
+</view>
+<view class="page-shell safe-bottom" wx:else>
+  <view class="panel empty-card">
+    <image class="empty-illustration" src="/assets/illustrations/empty-recipes.svg" mode="aspectFit" />
+    <view class="empty-title">食谱暂时还没准备好</view>
+    <view class="empty-desc">稍后重试，或返回食谱库看看别的推荐。</view>
+  </view>
+</view>

@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "growth-chart": "/components/growth-chart/index",
+    "recipe-card": "/components/recipe-card/index",
+    "section-card": "/components/section-card/index"
+  },
+  "navigationBarTitleText": "生长记录"
+}

@@ -1,0 +1,163 @@
+.chart-shell {
+  padding: 24rpx 24rpx 16rpx;
+}
+
+.chart-title {
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.chart-main {
+  display: flex;
+  gap: 10rpx;
+  margin-top: 24rpx;
+}
+
+.y-axis {
+  position: relative;
+  width: 54rpx;
+  height: 420rpx;
+}
+
+.y-tick {
+  position: absolute;
+  left: 0;
+  transform: translateY(50%);
+  font-size: 22rpx;
+  color: #9b9288;
+}
+
+.chart-area {
+  position: relative;
+  flex: 1;
+  height: 420rpx;
+  padding: 8rpx 20rpx 68rpx 8rpx;
+  border-left: 2rpx solid #efe9df;
+  border-bottom: 2rpx solid #efe9df;
+  box-sizing: border-box;
+}
+
+.grid-line {
+  position: absolute;
+  left: 0;
+  right: 20rpx;
+  border-top: 2rpx solid rgba(239, 233, 223, 0.85);
+}
+
+.band-column {
+  position: absolute;
+  background: rgba(127, 182, 255, 0.12);
+  z-index: 1;
+}
+
+.line-segment {
+  position: absolute;
+  height: 3rpx;
+  transform-origin: left center;
+  z-index: 2;
+  border-radius: 999rpx;
+}
+
+.ref-high {
+  background: rgba(184, 208, 242, 0.95);
+}
+
+.ref-mid {
+  background: rgba(164, 191, 230, 0.95);
+}
+
+.ref-low {
+  background: rgba(184, 208, 242, 0.95);
+}
+
+.actual-line {
+  height: 4rpx;
+  background: linear-gradient(90deg, #7fd58f 0%, #5abf73 100%);
+  z-index: 4;
+}
+
+.actual-point {
+  position: absolute;
+  transform: translate(-50%, 50%);
+  z-index: 5;
+}
+
+.point-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  border: 3rpx solid #ffffff;
+  background: #5abf73;
+  box-shadow: 0 6rpx 14rpx rgba(90, 191, 115, 0.22);
+}
+
+.point-dot.is-latest {
+  width: 16rpx;
+  height: 16rpx;
+  border-width: 4rpx;
+  box-shadow: 0 8rpx 18rpx rgba(90, 191, 115, 0.28);
+}
+
+.curve-tag {
+  position: absolute;
+  transform: translate(18rpx, 50%);
+  font-size: 22rpx;
+  color: #93a0af;
+  z-index: 3;
+}
+
+.curve-tag.ref-mid {
+  color: #6d7b89;
+}
+
+.latest-marker {
+  position: absolute;
+  top: 0;
+  bottom: 68rpx;
+  width: 0;
+  z-index: 1;
+}
+
+.latest-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-left: 2rpx dashed #95a9ff;
+}
+
+.latest-badge {
+  position: absolute;
+  right: -18rpx;
+  bottom: -22rpx;
+  transform: translateX(100%);
+  padding: 6rpx 12rpx;
+  border-radius: 10rpx;
+  background: #7f98ff;
+  color: #ffffff;
+  font-size: 20rpx;
+  line-height: 1.2;
+}
+
+.x-axis {
+  position: absolute;
+  left: 0;
+  right: 20rpx;
+  bottom: 0;
+  height: 54rpx;
+}
+
+.x-tick {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  font-size: 22rpx;
+  color: #8a8177;
+  white-space: nowrap;
+}
+
+.chart-foot {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+}

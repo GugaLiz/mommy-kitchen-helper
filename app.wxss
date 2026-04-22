@@ -1,0 +1,144 @@
+page {
+  background: #fff7ee;
+  color: #333333;
+  font-size: 28rpx;
+}
+
+.page-shell {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #fff4e5 0%, #ffe2be 45%, #dff6ef 100%);
+}
+
+.panel {
+  background: #ffffff;
+  border-radius: 32rpx;
+  box-shadow: 0 14rpx 36rpx rgba(212, 104, 79, 0.08);
+}
+
+.section-title {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.section-subtitle {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #8a8177;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.chip {
+  padding: 12rpx 22rpx;
+  border-radius: 999rpx;
+  background: #fff1dc;
+  color: #a8601a;
+  font-size: 24rpx;
+}
+
+.chip.active {
+  background: #ffa926;
+  color: #ffffff;
+}
+
+.primary-btn {
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #ffa926 0%, #ff8a3d 100%);
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 700;
+  border: none;
+}
+
+.secondary-btn {
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 22rpx;
+  border: 2rpx solid #ffd7a7;
+  background: #fff7ee;
+  color: #c66c25;
+  font-size: 28rpx;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: #fdf0e4;
+  color: #a8601a;
+  font-size: 22rpx;
+  margin-right: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.soft-green {
+  background: #e0f7f3;
+  color: #2f8e6d;
+}
+
+.muted {
+  color: #8a8177;
+}
+
+.pill-action {
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  background: #fff1dc;
+  color: #c66c25;
+  font-size: 24rpx;
+}
+
+.floating-sheet {
+  position: fixed;
+  left: 24rpx;
+  right: 24rpx;
+  bottom: 24rpx;
+  padding: 28rpx;
+  border-radius: 32rpx;
+  background: #ffffff;
+  box-shadow: 0 18rpx 46rpx rgba(0, 0, 0, 0.16);
+  z-index: 99;
+}
+
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.38);
+  z-index: 90;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+  color: #6d655d;
+}
+
+.input {
+  height: 84rpx;
+  padding: 0 24rpx;
+  border-radius: 22rpx;
+  background: #f8f4ef;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.safe-bottom {
+  padding-bottom: 40rpx;
+}

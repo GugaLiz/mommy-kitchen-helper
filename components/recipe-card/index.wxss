@@ -1,0 +1,51 @@
+.recipe-card {
+  position: relative;
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.recipe-cover {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 54rpx;
+  background: #fff6ea;
+}
+
+.recipe-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.recipe-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  margin-bottom: 10rpx;
+}
+
+.recipe-meta {
+  color: #8a8177;
+  font-size: 24rpx;
+  margin-bottom: 14rpx;
+}
+
+.recipe-tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.collect-mark {
+  position: absolute;
+  right: 20rpx;
+  top: 20rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: #fff3de;
+  color: #d4684f;
+  font-size: 20rpx;
+}

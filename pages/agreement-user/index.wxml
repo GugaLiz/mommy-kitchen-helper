@@ -1,0 +1,55 @@
+<view class="page-shell agreement-page">
+  <view class="panel agreement-card">
+    <view class="agreement-title">育儿助手用户协议</view>
+    <view class="agreement-date">更新日期：2026-04-22</view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">一、协议说明</view>
+      <view class="agreement-text">
+        欢迎使用“育儿助手”小程序。本协议用于说明你与本小程序之间关于服务使用、账号登录、内容浏览、记录管理及相关责任边界的约定。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">二、服务内容</view>
+      <view class="agreement-text">
+        本小程序主要提供宝宝档案管理、食谱浏览与收藏、生长记录、周计划生成等功能。我们会持续优化页面、规则与服务能力，具体功能以页面实际展示为准。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">三、用户使用规范</view>
+      <view class="agreement-text">
+        你应当合法、真实地填写宝宝相关信息，不得利用本服务发布违法违规、虚假、侵权或可能损害他人权益的内容，不得干扰本小程序正常运行。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">四、账号与登录</view>
+      <view class="agreement-text">
+        你可通过微信授权登录使用本小程序。登录后所关联的记录、收藏、做过食谱等数据将用于为你提供连续服务。请妥善保管你的微信账号及设备安全。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">五、免责声明</view>
+      <view class="agreement-text">
+        本小程序中的食谱建议、生长解读及提示内容，仅作为育儿信息参考，不替代医生、营养师或其他专业人士的诊疗与建议。如涉及宝宝健康异常，请及时咨询专业机构。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">六、服务变更与终止</view>
+      <view class="agreement-text">
+        我们有权根据业务发展、法律法规或运营需要，对功能、页面、规则进行调整，也可能在必要时暂停或终止部分服务。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">七、联系我们</view>
+      <view class="agreement-text">
+        如你对本协议或产品使用有疑问，可通过小程序内反馈入口联系我们。
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,62 @@
+.loading-page {
+  min-height: 100vh;
+  padding: 200rpx 48rpx 80rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.brand-badge {
+  width: 176rpx;
+  height: 176rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.76);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20rpx 40rpx rgba(212, 104, 79, 0.15);
+  overflow: hidden;
+  border: 6rpx solid rgba(255, 255, 255, 0.72);
+}
+
+.brand-logo {
+  width: 100%;
+  height: 100%;
+}
+
+.brand-title {
+  margin-top: 44rpx;
+  font-size: 48rpx;
+  font-weight: 700;
+}
+
+.brand-desc {
+  margin-top: 18rpx;
+  color: #7d6d61;
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 220rpx;
+}
+
+.center-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.agreement {
+  margin-top: 24rpx;
+  font-size: 22rpx;
+  color: #9a8f84;
+  line-height: 1.8;
+}
+
+.agreement-link {
+  color: #c66c25;
+  font-weight: 700;
+}

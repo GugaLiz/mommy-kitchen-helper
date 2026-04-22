@@ -1,0 +1,19 @@
+<view class="loading-page hero-gradient">
+  <view class="brand-badge">
+    <image class="brand-logo" src="/assets/images/logo.png" mode="aspectFill" />
+  </view>
+
+  <view class="brand-title">育儿助手</view>
+  <view class="brand-desc">科学喂养，轻松育儿</view>
+
+  <button class="primary-btn login-btn center-btn" bindtap="handleLogin">
+    微信一键登录
+  </button>
+
+  <view class="agreement">
+    登录即表示你已阅读并同意
+    <text class="agreement-link" bindtap="openUserAgreement">《用户协议》</text>
+    和
+    <text class="agreement-link" bindtap="openPrivacyAgreement">《隐私政策》</text>
+  </view>
+</view>

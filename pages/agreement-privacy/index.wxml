@@ -1,0 +1,55 @@
+<view class="page-shell agreement-page">
+  <view class="panel agreement-card">
+    <view class="agreement-title">育儿助手隐私政策</view>
+    <view class="agreement-date">更新日期：2026-04-22</view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">一、我们收集的信息</view>
+      <view class="agreement-text">
+        为了向你提供服务，我们可能收集或处理以下信息：微信登录标识信息、头像昵称、宝宝昵称、性别、出生日期、生长记录、食谱收藏/做过记录，以及你主动上传的头像或反馈内容。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">二、我们如何使用这些信息</view>
+      <view class="agreement-text">
+        这些信息将用于完成登录识别、生成宝宝专属食谱推荐、记录生长曲线、保存周计划、展示收藏与做过食谱，并用于改进产品体验和保障服务稳定运行。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">三、我们可能调用的设备能力</view>
+      <view class="agreement-text">
+        在你主动使用相关功能时，我们可能申请相册、图片上传、网络访问等权限，仅用于实现对应功能，不会在未获同意时擅自调用。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">四、信息存储与保护</view>
+      <view class="agreement-text">
+        我们会采取合理的安全措施保护你的信息，避免发生泄露、篡改或丢失。你在小程序中录入的部分信息可能存储在本地缓存或服务端数据库中，以支持连续使用体验。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">五、信息共享与披露</view>
+      <view class="agreement-text">
+        除法律法规要求、行政司法机关要求，或为实现基础服务必须的技术支持外，我们不会将你的个人信息随意共享、出售给无关第三方。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">六、你的权利</view>
+      <view class="agreement-text">
+        你可以在小程序中修改宝宝档案、更新个人资料、删除或停止使用相关功能。若你希望进一步删除相关记录或了解隐私处理情况，可通过反馈入口联系我们。
+      </view>
+    </view>
+
+    <view class="agreement-section">
+      <view class="section-title-text">七、未成年人信息说明</view>
+      <view class="agreement-text">
+        本小程序服务对象主要为家长或监护人。请你在充分知情并符合监护职责的前提下填写宝宝信息，并谨慎管理相关资料。
+      </view>
+    </view>
+  </view>
+</view>

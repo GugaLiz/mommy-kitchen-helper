@@ -1,0 +1,10 @@
+<view class="panel section-card">
+  <view class="row-between card-head" wx:if="{{title || actionText}}">
+    <view>
+      <view class="card-title">{{title}}</view>
+      <view class="card-desc" wx:if="{{subtitle}}">{{subtitle}}</view>
+    </view>
+    <view class="card-action" wx:if="{{actionText}}">{{actionText}}</view>
+  </view>
+  <slot />
+</view>

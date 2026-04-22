@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "section-card": "/components/section-card/index"
+  },
+  "navigationBarTitleText": "我的"
+}

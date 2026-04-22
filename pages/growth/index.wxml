@@ -1,0 +1,75 @@
+<view class="page-shell safe-bottom">
+  <view class="panel baby-strip row-between">
+    <view>当前宝宝：{{baby.nickname}} {{baby.ageText}} ▾</view>
+    <view class="pill-action" bindtap="switchBaby">切换</view>
+  </view>
+
+  <section-card title="最新记录">
+    <view class="metric-row">
+      <view class="metric-card">
+        <view class="metric-label">{{measureLabel}}</view>
+        <view class="metric-value">{{latestRecord.height}} cm</view>
+        <view class="metric-change">+{{change.heightChange}}cm</view>
+      </view>
+      <view class="metric-card">
+        <view class="metric-label">体重</view>
+        <view class="metric-value">{{latestRecord.weight}} kg</view>
+        <view class="metric-change">+{{change.weightChange}}kg</view>
+      </view>
+    </view>
+    <view class="muted">记录时间：{{latestRecord.measuredDate}}</view>
+    <button class="primary-btn growth-btn" bindtap="toggleForm">记录新数据</button>
+  </section-card>
+
+  <growth-chart chartData="{{chartData}}" percentileText="{{latestRecord.percentile}}" />
+
+  <section-card title="智能解读" custom-class="analysis-card">
+    <view class="analysis-block">
+      <view class="analysis-text">{{analysis}}</view>
+    </view>
+    <view class="muted analysis-sub">推荐食谱</view>
+    <recipe-card wx:for="{{recommendationCards}}" wx:key="id" recipe="{{item}}" bindtapcard="goDetail" />
+    <view class="empty-inline" wx:if="{{!recommendationCards || recommendationCards.length === 0}}">
+      <image class="empty-inline-image" src="/assets/illustrations/empty-growth.svg" mode="aspectFit" />
+      <view class="empty-inline-title">先记录一条生长数据吧</view>
+      <view class="empty-inline-desc">有了宝宝最近的身高体重后，我们会给出更贴合的解读和推荐。</view>
+    </view>
+  </section-card>
+
+  <section-card title="历史记录">
+    <view class="history-row" wx:for="{{historyRecords}}" wx:key="id">
+      <text>{{item.measuredDate}}</text>
+      <text>{{item.height}}cm</text>
+      <text>{{item.weight}}kg</text>
+    </view>
+    <view class="empty-inline" wx:if="{{historyRecords.length === 0}}">
+      <image class="empty-inline-image" src="/assets/illustrations/empty-growth.svg" mode="aspectFit" />
+      <view class="empty-inline-title">还没有历史记录</view>
+      <view class="empty-inline-desc">点击上方“记录新数据”，就能看到后续的成长趋势。</view>
+    </view>
+  </section-card>
+
+  <view class="modal-mask" wx:if="{{showForm}}" bindtap="toggleForm"></view>
+
+  <view class="floating-sheet" wx:if="{{showForm}}">
+    <view class="row-between">
+      <view class="section-title">记录生长数据</view>
+      <view bindtap="toggleForm">关闭</view>
+    </view>
+    <view class="sheet-field">
+      <text class="field-label">日期</text>
+      <picker mode="date" value="{{form.measuredDate}}" start="2018-01-01" end="2035-12-31" bindchange="handleDateChange">
+        <view class="input picker-input">{{form.measuredDate || '请选择日期'}}</view>
+      </picker>
+    </view>
+    <view class="sheet-field">
+      <text class="field-label">{{measureLabel}}（cm）</text>
+      <input class="input" type="digit" value="{{form.height}}" data-field="height" bindinput="handleInput" />
+    </view>
+    <view class="sheet-field">
+      <text class="field-label">体重（kg）</text>
+      <input class="input" type="digit" value="{{form.weight}}" data-field="weight" bindinput="handleInput" />
+    </view>
+    <button class="primary-btn center-btn save-sheet-btn" bindtap="saveRecord">保存</button>
+  </view>
+</view>

@@ -1,0 +1,70 @@
+<view class="page-shell safe-bottom">
+  <view class="panel home-head hero-gradient">
+    <view class="row-between">
+      <view class="baby-block" bindtap="handleSwitchBaby">
+        <image class="baby-avatar" src="{{currentBaby.avatarImage}}" mode="aspectFill" />
+        <view>
+          <view class="baby-name">{{currentBaby.nickname}} <text class="muted">▾</text></view>
+          <view class="baby-meta">{{currentBaby.ageText}} | {{currentBaby.allergyText}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <section-card title="今日三餐" subtitle="根据月龄、过敏源和近期偏好生成">
+    <view class="meal-card breakfast" data-type="breakfast" bindtap="openRecipe">
+      <view class="row-between">
+        <view>
+          <view class="meal-title">🥣 早餐</view>
+          <view class="meal-name" data-id="{{today.breakfast.id}}">{{today.breakfast.name}}</view>
+          <view class="meal-meta">{{today.breakfast.cookingTime}}分钟 | {{today.breakfast.primaryTag}}</view>
+        </view>
+        <view class="pill-action swap-pill" data-type="breakfast" catchtap="swapMeal">换一换</view>
+      </view>
+    </view>
+    <view class="meal-card lunch" data-type="lunch" bindtap="openRecipe">
+      <view class="row-between">
+        <view>
+          <view class="meal-title">☀️ 午餐</view>
+          <view class="meal-name" data-id="{{today.lunch.id}}">{{today.lunch.name}}</view>
+          <view class="meal-meta">{{today.lunch.cookingTime}}分钟 | {{today.lunch.primaryTag}}</view>
+        </view>
+        <view class="pill-action swap-pill" data-type="lunch" catchtap="swapMeal">换一换</view>
+      </view>
+    </view>
+    <view class="meal-card dinner" data-type="dinner" bindtap="openRecipe">
+      <view class="row-between">
+        <view>
+          <view class="meal-title">🌙 晚餐</view>
+          <view class="meal-name" data-id="{{today.dinner.id}}">{{today.dinner.name}}</view>
+          <view class="meal-meta">{{today.dinner.cookingTime}}分钟 | {{today.dinner.primaryTag}}</view>
+        </view>
+        <view class="pill-action swap-pill" data-type="dinner" catchtap="swapMeal">换一换</view>
+      </view>
+    </view>
+  </section-card>
+
+  <view class="panel plan-strip row-between">
+    <view>
+      <view class="section-title">一键生成周计划</view>
+      <view class="section-subtitle">生成本周三餐与备菜清单</view>
+    </view>
+    <button class="primary-btn strip-btn" bindtap="openWeeklyPlan">立即生成</button>
+  </view>
+
+  <section-card title="我的内容" subtitle="常用入口放到首页更方便">
+    <view class="quick-grid">
+      <view class="quick-item" data-type="collection" bindtap="openMyContent">我的收藏</view>
+      <view class="quick-item" data-type="made" bindtap="openMyContent">做过食谱</view>
+    </view>
+  </section-card>
+
+  <section-card title="猜你喜欢" subtitle="基于宝宝年龄的温和推荐">
+    <recipe-card wx:for="{{today.suggestions}}" wx:key="id" recipe="{{item}}" bindtapcard="goDetail" />
+    <view class="empty-inline" wx:if="{{!today.suggestions || today.suggestions.length === 0}}">
+      <image class="empty-inline-image" src="/assets/illustrations/empty-home.svg" mode="aspectFit" />
+      <view class="empty-inline-title">今日推荐正在准备中</view>
+      <view class="empty-inline-desc">先生成宝宝档案或稍后刷新，我们会按月龄给你推荐。</view>
+    </view>
+  </section-card>
+</view>

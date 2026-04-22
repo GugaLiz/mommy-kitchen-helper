@@ -1,0 +1,60 @@
+.plan-header {
+  padding: 28rpx;
+  margin-bottom: 22rpx;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 22rpx;
+}
+
+.day-card {
+  padding: 24rpx 28rpx;
+  margin-bottom: 18rpx;
+}
+
+.day-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  margin-bottom: 16rpx;
+}
+
+.meal-line {
+  padding: 10rpx 0;
+  color: #5d554e;
+}
+
+.shopping-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f2eee9;
+}
+
+.shopping-sheet {
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.shopping-scroll {
+  max-height: calc(70vh - 92rpx);
+  margin-top: 16rpx;
+}
+
+.close-pill {
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  background: #fff1dc;
+  color: #c66c25;
+}
+
+.center-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
