@@ -1,7 +1,18 @@
 <view class="page-shell safe-bottom">
   <view class="panel edit-panel">
     <view class="section-title">{{modeTitle}}</view>
-    <view class="section-subtitle">支持昵称、性别、生日、过敏源和饮食偏好</view>
+    <view class="section-subtitle">支持昵称、头像、性别、生日、过敏源和饮食偏好</view>
+
+    <view class="avatar-editor">
+      <image class="baby-avatar-preview" src="{{form.avatarImage}}" mode="aspectFill" />
+      <button
+        class="secondary-btn center-btn avatar-upload-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="handleChooseAvatar"
+      >
+        上传头像
+      </button>
+    </view>
 
     <view class="field">
       <text class="field-label">昵称</text>
@@ -26,10 +37,10 @@
       <text class="field-label">过敏源（可多选）</text>
       <view class="chip-row">
         <view class="chip {{item.active ? 'active' : ''}}" wx:for="{{allergyOptions}}" wx:key="value" data-value="{{item.value}}" bindtap="toggleAllergy">{{item.value}}</view>
-        <view class="chip add-chip" bindtap="startAddAllergy">＋ 添加</view>
+        <view class="chip add-chip" bindtap="startAddAllergy">+ 添加</view>
       </view>
       <view class="add-row" wx:if="{{addingAllergy}}">
-        <input class="input add-input" value="{{newAllergy}}" placeholder="输入新的过敏原" bindinput="handleNewAllergyInput" />
+        <input class="input add-input" value="{{newAllergy}}" placeholder="输入新的过敏源" bindinput="handleNewAllergyInput" />
         <button class="secondary-btn mini-btn center-btn" bindtap="confirmAddAllergy">确定</button>
       </view>
     </view>
@@ -38,7 +49,7 @@
       <text class="field-label">饮食偏好</text>
       <view class="chip-row">
         <view class="chip {{item.active ? 'active' : ''}}" wx:for="{{preferenceOptions}}" wx:key="value" data-value="{{item.value}}" bindtap="togglePreference">{{item.value}}</view>
-        <view class="chip add-chip" bindtap="startAddPreference">＋ 添加</view>
+        <view class="chip add-chip" bindtap="startAddPreference">+ 添加</view>
       </view>
       <view class="add-row" wx:if="{{addingPreference}}">
         <input class="input add-input" value="{{newPreference}}" placeholder="输入新的饮食偏好" bindinput="handleNewPreferenceInput" />

@@ -6,6 +6,28 @@ const router = express.Router()
 
 router.use(authenticate)
 
+function normalizeRecipePayload(payload = {}) {
+  const minAgeMonths = Number(payload.minAgeMonths ?? payload.min_age_months ?? 6)
+  const maxAgeMonths = Number(payload.maxAgeMonths ?? payload.max_age_months ?? Math.max(minAgeMonths, 72))
+  const cookingTime = Number(payload.cookingTime ?? payload.cooking_time ?? 20)
+
+  return {
+    name: String(payload.name || '').trim(),
+    min_age_months: minAgeMonths,
+    max_age_months: maxAgeMonths,
+    cooking_time: cookingTime,
+    tags: Array.isArray(payload.tags) ? payload.tags : [],
+    allergens: Array.isArray(payload.allergens) ? payload.allergens : [],
+    ingredients: Array.isArray(payload.ingredients) ? payload.ingredients : [],
+    steps: Array.isArray(payload.steps) ? payload.steps : [],
+    tips: payload.tips || '',
+    nutrition_info: payload.nutritionInfo || payload.nutrition_info || '',
+    image_text: payload.imageText || '🥣',
+    is_public: payload.isPublic !== false,
+    audit_status: payload.isPublic === false ? 'private' : 'approved'
+  }
+}
+
 router.get('/list', async (req, res) => {
   try {
     const {
@@ -20,6 +42,7 @@ router.get('/list', async (req, res) => {
     let query = supabase
       .from('recipes')
       .select('*', { count: 'exact' })
+      .or(`is_public.eq.true,created_by_user_id.eq.${req.user.id}`)
       .order('created_at', { ascending: false })
 
     if (keyword) {
@@ -59,9 +82,188 @@ router.get('/list', async (req, res) => {
       }
     })
   } catch (error) {
+    if (error.code === '42703') {
+      return res.status(500).json({
+        code: 500,
+        message: '请先执行 20260423_add_user_recipes.sql 数据库迁移'
+      })
+    }
+
     return res.status(500).json({
       code: 500,
       message: error.message || 'Failed to fetch recipes'
+    })
+  }
+})
+
+router.get('/my/list', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('recipes')
+      .select('*')
+      .eq('created_by_user_id', req.user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    return res.json({
+      code: 0,
+      data: {
+        recipes: data || []
+      }
+    })
+  } catch (error) {
+    if (error.code === '42703') {
+      return res.status(500).json({
+        code: 500,
+        message: '请先执行 20260423_add_user_recipes.sql 数据库迁移'
+      })
+    }
+
+    return res.status(500).json({
+      code: 500,
+      message: error.message || 'Failed to fetch my recipes'
+    })
+  }
+})
+
+router.post('/create', async (req, res) => {
+  try {
+    const recipe = normalizeRecipePayload(req.body || {})
+    if (!recipe.name) {
+      return res.status(400).json({
+        code: 400,
+        message: 'Missing recipe name'
+      })
+    }
+
+    const { data, error } = await supabase
+      .from('recipes')
+      .insert([{
+        ...recipe,
+        created_by_user_id: req.user.id
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return res.json({
+      code: 0,
+      data: {
+        recipe: data
+      }
+    })
+  } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({
+        code: 409,
+        message: '食谱名称已存在，请换一个名称'
+      })
+    }
+
+    if (error.code === '42703') {
+      return res.status(500).json({
+        code: 500,
+        message: '请先执行 20260423_add_user_recipes.sql 数据库迁移'
+      })
+    }
+
+    return res.status(500).json({
+      code: 500,
+      message: error.message || 'Failed to create recipe'
+    })
+  }
+})
+
+router.patch('/:recipeId/visibility', async (req, res) => {
+  try {
+    const { recipeId } = req.params
+    const isPublic = req.body?.isPublic !== false
+
+    const { data, error } = await supabase
+      .from('recipes')
+      .update({
+        is_public: isPublic,
+        audit_status: isPublic ? 'approved' : 'private',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', recipeId)
+      .eq('created_by_user_id', req.user.id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return res.json({
+      code: 0,
+      data: {
+        recipe: data
+      }
+    })
+  } catch (error) {
+    if (error.code === '42703') {
+      return res.status(500).json({
+        code: 500,
+        message: '请先执行 20260423_add_user_recipes.sql 数据库迁移'
+      })
+    }
+
+    return res.status(500).json({
+      code: 500,
+      message: error.message || 'Failed to update recipe visibility'
+    })
+  }
+})
+
+router.patch('/:recipeId', async (req, res) => {
+  try {
+    const { recipeId } = req.params
+    const recipe = normalizeRecipePayload(req.body || {})
+    if (!recipe.name) {
+      return res.status(400).json({
+        code: 400,
+        message: 'Missing recipe name'
+      })
+    }
+
+    const { data, error } = await supabase
+      .from('recipes')
+      .update({
+        ...recipe,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', recipeId)
+      .eq('created_by_user_id', req.user.id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return res.json({
+      code: 0,
+      data: {
+        recipe: data
+      }
+    })
+  } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({
+        code: 409,
+        message: '食谱名称已存在，请换一个名称'
+      })
+    }
+
+    if (error.code === '42703') {
+      return res.status(500).json({
+        code: 500,
+        message: '请先执行 20260423_add_user_recipes.sql 数据库迁移'
+      })
+    }
+
+    return res.status(500).json({
+      code: 500,
+      message: error.message || 'Failed to update recipe'
     })
   }
 })
@@ -217,6 +419,7 @@ router.get('/:recipeId', async (req, res) => {
         .from('recipes')
         .select('*')
         .eq('id', recipeId)
+        .or(`is_public.eq.true,created_by_user_id.eq.${req.user.id}`)
         .single(),
       supabase
         .from('recipe_collections')

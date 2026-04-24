@@ -1,11 +1,11 @@
 <view class="page-shell safe-bottom">
   <view class="panel baby-strip row-between">
-    <view>当前宝宝：{{baby.nickname}} {{baby.ageText}} ▾</view>
+    <view>当前宝宝：{{baby.nickname}} {{baby.ageText}} ▼</view>
     <view class="pill-action" bindtap="switchBaby">切换</view>
   </view>
 
   <section-card title="最新记录">
-    <view class="metric-row">
+    <view class="metric-row" wx:if="{{hasGrowthRecord}}">
       <view class="metric-card">
         <view class="metric-label">{{measureLabel}}</view>
         <view class="metric-value">{{latestRecord.height}} cm</view>
@@ -17,23 +17,20 @@
         <view class="metric-change">+{{change.weightChange}}kg</view>
       </view>
     </view>
-    <view class="muted">记录时间：{{latestRecord.measuredDate}}</view>
+    <view class="muted" wx:if="{{hasGrowthRecord}}">记录时间：{{latestRecord.measuredDate}}</view>
     <button class="primary-btn growth-btn" bindtap="toggleForm">记录新数据</button>
   </section-card>
 
-  <growth-chart chartData="{{chartData}}" percentileText="{{latestRecord.percentile}}" />
+  <growth-chart chartList="{{chartList}}" chartData="{{chartData}}" percentileText="{{latestRecord.percentile}}" />
 
   <section-card title="智能解读" custom-class="analysis-card">
     <view class="analysis-block">
       <view class="analysis-text">{{analysis}}</view>
     </view>
-    <view class="muted analysis-sub">推荐食谱</view>
-    <recipe-card wx:for="{{recommendationCards}}" wx:key="id" recipe="{{item}}" bindtapcard="goDetail" />
-    <view class="empty-inline" wx:if="{{!recommendationCards || recommendationCards.length === 0}}">
-      <image class="empty-inline-image" src="/assets/illustrations/empty-growth.svg" mode="aspectFit" />
-      <view class="empty-inline-title">先记录一条生长数据吧</view>
-      <view class="empty-inline-desc">有了宝宝最近的身高体重后，我们会给出更贴合的解读和推荐。</view>
-    </view>
+    <block wx:if="{{hasGrowthRecord && recommendationCards.length}}">
+      <view class="muted analysis-sub">推荐食谱</view>
+      <recipe-card wx:for="{{recommendationCards}}" wx:key="id" recipe="{{item}}" bindtapcard="goDetail" />
+    </block>
   </section-card>
 
   <section-card title="历史记录">
@@ -54,7 +51,9 @@
   <view class="floating-sheet" wx:if="{{showForm}}">
     <view class="row-between">
       <view class="section-title">记录生长数据</view>
-      <view bindtap="toggleForm">关闭</view>
+      <view class="close-icon-btn" bindtap="toggleForm">
+        <text class="close-icon-text">x</text>
+      </view>
     </view>
     <view class="sheet-field">
       <text class="field-label">日期</text>

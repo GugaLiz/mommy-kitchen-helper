@@ -59,6 +59,12 @@ page {
   font-size: 30rpx;
   font-weight: 700;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  padding: 0 24rpx;
 }
 
 .secondary-btn {
@@ -69,6 +75,24 @@ page {
   background: #fff7ee;
   color: #c66c25;
   font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  padding: 0 24rpx;
+}
+
+.primary-btn::after,
+.secondary-btn::after {
+  border: none;
+}
+
+.center-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .tag {
@@ -137,6 +161,28 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.close-icon-btn {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff1dc;
+  color: #c66c25;
+  font-size: 36rpx;
+  line-height: 56rpx;
+  flex-shrink: 0;
+  text-align: center;
+  padding: 0;
+}
+
+.close-icon-text {
+  display: block;
+  line-height: 1;
+  transform: translateY(-2rpx);
 }
 
 .safe-bottom {

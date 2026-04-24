@@ -8,6 +8,7 @@ import cors from 'cors'
 import './lib/load-env.js'
 import authRoutes from './routes/auth.js'
 import babyRoutes from './routes/baby.js'
+import familyRoutes from './routes/family.js'
 import growthRoutes from './routes/growth.js'
 import recipeRoutes from './routes/recipe.js'
 import recommendationRoutes from './routes/recommendation.js'
@@ -39,6 +40,7 @@ export function createApp() {
   // API 路由
   app.use('/api/auth', authRoutes)
   app.use('/api/baby', babyRoutes)
+  app.use('/api/family', familyRoutes)
   app.use('/api/growth-record', growthRoutes)
   app.use('/api/recipe', recipeRoutes)
   app.use('/api/recommendation', recommendationRoutes)

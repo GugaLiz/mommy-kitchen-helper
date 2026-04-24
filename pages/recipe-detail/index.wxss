@@ -16,6 +16,25 @@
   font-weight: 700;
 }
 
+.detail-visibility {
+  display: inline-flex;
+  margin-top: 14rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.detail-visibility.public {
+  background: #eaf9ef;
+  color: #2f8e6d;
+}
+
+.detail-visibility.private {
+  background: #f6f1eb;
+  color: #8a8177;
+}
+
 .detail-meta {
   margin-top: 14rpx;
   color: #8a8177;

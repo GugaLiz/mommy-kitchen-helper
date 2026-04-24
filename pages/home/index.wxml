@@ -49,22 +49,64 @@
       <view class="section-title">一键生成周计划</view>
       <view class="section-subtitle">生成本周三餐与备菜清单</view>
     </view>
-    <button class="primary-btn strip-btn" bindtap="openWeeklyPlan">立即生成</button>
+    <view class="plan-strip-actions {{hasConfirmedWeeklyPlan ? 'has-secondary' : ''}}">
+      <button class="secondary-btn strip-btn secondary-strip-btn" wx:if="{{hasConfirmedWeeklyPlan}}" bindtap="viewWeeklyPlan">查看本周菜单</button>
+      <button class="primary-btn strip-btn {{hasConfirmedWeeklyPlan ? '' : 'full-width'}}" bindtap="openWeeklyPlan">{{hasConfirmedWeeklyPlan ? '重新生成' : '立即生成'}}</button>
+    </view>
   </view>
 
   <section-card title="我的内容" subtitle="常用入口放到首页更方便">
     <view class="quick-grid">
       <view class="quick-item" data-type="collection" bindtap="openMyContent">我的收藏</view>
       <view class="quick-item" data-type="made" bindtap="openMyContent">做过食谱</view>
+      <view class="quick-item" data-type="created" bindtap="openMyContent">我的食谱</view>
     </view>
   </section-card>
 
   <section-card title="猜你喜欢" subtitle="基于宝宝年龄的温和推荐">
-    <recipe-card wx:for="{{today.suggestions}}" wx:key="id" recipe="{{item}}" bindtapcard="goDetail" />
+    <recipe-card wx:for="{{today.suggestions}}" wx:key="id" recipe="{{item}}" showOwnerActions="{{false}}" bindtapcard="goDetail" />
     <view class="empty-inline" wx:if="{{!today.suggestions || today.suggestions.length === 0}}">
       <image class="empty-inline-image" src="/assets/illustrations/empty-home.svg" mode="aspectFit" />
       <view class="empty-inline-title">今日推荐正在准备中</view>
       <view class="empty-inline-desc">先生成宝宝档案或稍后刷新，我们会按月龄给你推荐。</view>
     </view>
   </section-card>
+
+  <view class="modal-mask" wx:if="{{showPlanPicker}}" bindtap="closePlanPicker"></view>
+
+  <view class="floating-sheet plan-picker-sheet" wx:if="{{showPlanPicker}}">
+    <view class="row-between">
+      <view>
+        <view class="section-title">生成周计划前先选食谱</view>
+        <view class="section-subtitle">勾选的食谱会优先加入本周计划</view>
+      </view>
+      <view class="close-icon-btn" bindtap="closePlanPicker">
+        <text class="close-icon-text">×</text>
+      </view>
+    </view>
+
+    <view class="muted picker-loading" wx:if="{{loadingPlanPicker}}">正在读取我的收藏、做过食谱和我的食谱...</view>
+
+    <scroll-view scroll-y class="plan-picker-scroll" wx:else>
+      <view class="plan-group" wx:for="{{planRecipeGroups}}" wx:key="key">
+        <view class="plan-group-title">{{item.title}}</view>
+        <view class="empty-picker-line" wx:if="{{item.recipes.length === 0}}">暂无食谱</view>
+        <view
+          class="plan-recipe-option {{recipe.checked ? 'active' : ''}}"
+          wx:for="{{item.recipes}}"
+          wx:for-item="recipe"
+          wx:key="id"
+          data-id="{{recipe.id}}"
+          bindtap="togglePlanRecipe"
+        >
+          <text class="plan-check">{{recipe.checked ? '✓' : ''}}</text>
+          <text class="plan-recipe-name">{{recipe.name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="plan-picker-actions">
+      <button class="primary-btn plan-picker-btn center-btn" bindtap="generateWeeklyPlanWithSelection">确认生成</button>
+    </view>
+  </view>
 </view>

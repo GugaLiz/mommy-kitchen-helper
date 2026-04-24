@@ -1,22 +1,42 @@
 <view class="page-shell safe-bottom">
   <view class="panel profile-card" bindtap="openProfileEditor">
-    <image class="profile-avatar" src="{{user.avatarImage}}" mode="aspectFill" />
-    <view>
-      <view class="profile-name">{{user.nickname}}</view>
-      <view class="muted">{{user.bio || '点击补充个人说明'}}</view>
+    <view class="profile-main">
+      <image class="profile-avatar" src="{{user.avatarImage}}" mode="aspectFill" />
+      <view class="profile-text">
+        <view class="profile-name-row">
+          <view class="profile-name">{{user.nickname}}</view>
+          <view class="profile-edit-icon">
+            <view class="profile-edit-pencil"></view>
+          </view>
+        </view>
+        <view class="muted">{{user.bio || '点击补充个人说明'}}</view>
+      </view>
     </view>
   </view>
 
   <section-card title="我的宝宝">
     <view class="baby-item" wx:for="{{babies}}" wx:key="id" data-id="{{item.id}}" bindtap="editBaby">
-      <view>
-        <view class="baby-item-title">{{item.nickname}} · {{item.gender}} · {{item.ageText}}</view>
-        <view class="muted">过敏：{{item.allergyText}}</view>
-        <view class="muted">偏好：{{item.preferenceText}}</view>
+      <view class="baby-item-main">
+        <image class="baby-item-avatar" src="{{item.avatarImage}}" mode="aspectFill" />
+        <view class="baby-item-info">
+          <view class="baby-item-title">{{item.nickname}} · {{item.gender}} · {{item.ageText}}</view>
+          <view class="muted">过敏：{{item.allergyText}}</view>
+          <view class="muted">偏好：{{item.preferenceText}}</view>
+        </view>
       </view>
       <view class="edit-pill">编辑</view>
     </view>
     <button class="secondary-btn add-btn center-btn" bindtap="createBaby">+ 添加宝宝</button>
+  </section-card>
+
+  <section-card title="我的家庭" subtitle="邀请家人一起管理宝宝记录和周计划">
+    <view class="family-entry" bindtap="openFamily">
+      <view>
+        <view class="family-entry-title">家庭共享</view>
+        <view class="muted">邀请爸爸或长辈加入，同步查看宝宝、生长记录和菜单</view>
+      </view>
+      <view class="family-enter-pill">进入</view>
+    </view>
   </section-card>
 
   <section-card title="设置">
@@ -34,12 +54,19 @@
   <view class="floating-sheet profile-sheet" wx:if="{{showProfileEditor}}">
     <view class="row-between">
       <view class="section-title">编辑个人资料</view>
-      <view bindtap="closeProfileEditor">关闭</view>
+      <view class="close-icon-btn" bindtap="closeProfileEditor">
+        <text class="close-icon-text">×</text>
+      </view>
     </view>
-    <view class="profile-editor-avatar" bindtap="chooseAvatar">
+    <view class="profile-editor-avatar">
       <image class="profile-editor-image" src="{{profileForm.avatarImage}}" mode="aspectFill" />
-      <view class="muted profile-editor-tip">点击上传头像</view>
-      <view class="muted profile-editor-subtip">支持上传，裁剪能力可在下一版继续细化</view>
+      <button
+        class="avatar-picker-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="handleChooseAvatar"
+      >
+        选择头像
+      </button>
     </view>
     <view class="profile-editor-item" bindtap="editNickname">
       <text>昵称</text>

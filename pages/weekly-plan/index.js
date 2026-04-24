@@ -32,9 +32,18 @@ Page({
     })
   },
 
+  swapDayPlan(event) {
+    const dayIndex = Number(event.currentTarget.dataset.index || 0)
+    api.swapWeeklyPlanDay(this.data.baby.id, dayIndex).then(plan => {
+      this.setData({ plan })
+      wx.showToast({ title: '已更换当天菜单', icon: 'success' })
+    })
+  },
+
   showShoppingList() {
     api.buildShoppingList(this.data.baby.id).then(shoppingList => {
       this.setData({ shoppingList, showList: true })
+      wx.showToast({ title: '本周菜单已确定', icon: 'success' })
     })
   },
 

@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { supabase } from '../lib/supabase.js'
 import { getJwtSecret } from '../lib/config.js'
+import { ensureDefaultFamilyForUser } from '../services/family.js'
 
 export async function authenticate(req, res, next) {
   try {
@@ -30,6 +31,9 @@ export async function authenticate(req, res, next) {
 
     req.auth = decoded
     req.user = user
+    const familyBundle = await ensureDefaultFamilyForUser(user)
+    req.family = familyBundle.family
+    req.familyMember = familyBundle.member
     next()
   } catch (error) {
     return res.status(401).json({

@@ -1,0 +1,56 @@
+<view class="page-shell safe-bottom">
+  <view class="panel family-hero" wx:if="{{!loading}}">
+    <view class="row-between family-hero-head">
+      <view>
+        <view class="section-title">{{family.name || '我的家庭'}}</view>
+        <view class="section-subtitle">我的身份：{{myRole === 'owner' ? '创建者' : (myRole === 'viewer' ? '仅查看' : '可编辑')}}</view>
+      </view>
+      <view class="edit-pill" wx:if="{{myRole === 'owner'}}" bindtap="editFamilyName">改名</view>
+    </view>
+    <view class="family-summary">
+      <view class="family-stat">
+        <text class="family-stat-value">{{members.length}}</text>
+        <text class="family-stat-label">成员</text>
+      </view>
+      <view class="family-stat">
+        <text class="family-stat-value">共享中</text>
+        <text class="family-stat-label">宝宝 / 生长 / 周计划</text>
+      </view>
+    </view>
+  </view>
+
+  <section-card title="家庭成员" subtitle="加入同一家庭后即可共享宝宝记录">
+    <view class="loading-line muted" wx:if="{{loading}}">正在读取家庭信息...</view>
+    <block wx:else>
+      <view class="member-row" wx:for="{{members}}" wx:key="id">
+        <view class="member-main">
+          <image class="member-avatar" src="{{item.user.avatar_url || '/assets/avatars/mom-q.svg'}}" mode="aspectFill" />
+          <view class="member-info">
+            <view class="member-name">{{item.user.nickname || '家庭成员'}}</view>
+            <view class="muted">{{item.relation || '家人'}} · {{item.role === 'owner' ? '创建者' : (item.role === 'viewer' ? '仅查看' : '可编辑')}}</view>
+          </view>
+        </view>
+      </view>
+    </block>
+  </section-card>
+
+  <section-card title="邀请家人" subtitle="邀请码 24 小时有效，建议发给爸爸或长辈">
+    <button class="primary-btn center-btn family-btn" bindtap="generateInvite">生成邀请码</button>
+    <view class="invite-card" wx:if="{{latestInvite}}">
+      <view class="invite-code">{{latestInvite.code}}</view>
+      <view class="muted">有效期至：{{latestInvite.expireText || '24小时内'}}</view>
+      <button class="secondary-btn center-btn invite-copy-btn" bindtap="copyInviteCode">一键复制邀请码</button>
+    </view>
+  </section-card>
+
+  <section-card title="输入邀请码加入" subtitle="适用于当前账号加入其他家庭">
+    <input
+      class="input family-input"
+      placeholder="请输入 6 位邀请码"
+      maxlength="6"
+      value="{{joinCode}}"
+      bindinput="handleJoinCodeInput"
+    />
+    <button class="secondary-btn center-btn family-btn join-btn" bindtap="confirmJoin">确认加入</button>
+  </section-card>
+</view>

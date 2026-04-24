@@ -16,7 +16,7 @@ router.get('/today', async (req, res) => {
       })
     }
 
-    const result = await generateTodayRecommendation(req.user.id, babyId)
+    const result = await generateTodayRecommendation(req.user.id, babyId, 'default', req.family?.id || null)
     return res.json({
       code: 0,
       data: result
@@ -48,7 +48,8 @@ router.post('/swap-meal', async (req, res) => {
       babyId,
       mealType,
       String(Date.now()),
-      Array.isArray(excludeRecipeIds) ? excludeRecipeIds : []
+      Array.isArray(excludeRecipeIds) ? excludeRecipeIds : [],
+      req.family?.id || null
     )
     return res.json({
       code: 0,

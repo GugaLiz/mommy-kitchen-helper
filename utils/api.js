@@ -1,9 +1,40 @@
 const store = require('./store')
+const { isPersistableAvatar } = require('./avatar')
 
 const DEFAULT_API_BASE_URL = 'http://127.0.0.1:3000/api'
+const MOCK_CONFIG_KEY = 'mock_api_enabled'
+const DEFAULT_MOCK_API_ENABLED = false
+const DEV_LOGIN_CONFIG_KEY = 'dev_login_enabled'
+const DEFAULT_DEV_LOGIN_ENABLED = false
 
 function getApiBaseUrl() {
   return wx.getStorageSync('api_base_url') || DEFAULT_API_BASE_URL
+}
+
+function isMockEnabled() {
+  const stored = wx.getStorageSync(MOCK_CONFIG_KEY)
+  if (stored === '' || stored === undefined || stored === null) {
+    return DEFAULT_MOCK_API_ENABLED
+  }
+  return !!stored
+}
+
+function setMockEnabled(enabled) {
+  wx.setStorageSync(MOCK_CONFIG_KEY, !!enabled)
+  return !!enabled
+}
+
+function isDevLoginEnabled() {
+  const stored = wx.getStorageSync(DEV_LOGIN_CONFIG_KEY)
+  if (stored === '' || stored === undefined || stored === null) {
+    return DEFAULT_DEV_LOGIN_ENABLED
+  }
+  return !!stored
+}
+
+function setDevLoginEnabled(enabled) {
+  wx.setStorageSync(DEV_LOGIN_CONFIG_KEY, !!enabled)
+  return !!enabled
 }
 
 function request(method, path, data, { auth = true } = {}) {
@@ -24,6 +55,7 @@ function request(method, path, data, { auth = true } = {}) {
       header: headers,
       success: (response) => {
         const payload = response.data || {}
+        console.log(`[api] ${method} ${path} -> ${response.statusCode}`, payload)
         if (response.statusCode >= 200 && response.statusCode < 300 && payload.code === 0) {
           resolve(payload.data)
           return
@@ -36,10 +68,6 @@ function request(method, path, data, { auth = true } = {}) {
   })
 }
 
-function withFallback(remoteTask, localTask) {
-  return remoteTask().catch(() => localTask())
-}
-
 function mapGenderFromDb(gender) {
   if (gender === 'male') return '男'
   if (gender === 'female') return '女'
@@ -47,6 +75,8 @@ function mapGenderFromDb(gender) {
 }
 
 function mapBaby(record) {
+  const fallbackAvatar = record.gender === 'female' ? '/assets/avatars/girl-q.svg' : '/assets/avatars/boy-q.svg'
+  const avatarImage = record.avatar_url || record.avatarUrl || ''
   return {
     id: record.id,
     nickname: record.nickname,
@@ -54,7 +84,7 @@ function mapBaby(record) {
     birthDate: record.birth_date,
     allergies: record.allergies || [],
     dietaryPreferences: record.dietary_preferences || [],
-    avatarImage: record.gender === 'female' ? '/assets/avatars/girl-q.svg' : '/assets/avatars/boy-q.svg',
+    avatarImage: isPersistableAvatar(avatarImage) ? avatarImage : fallbackAvatar,
     active: !!record.is_active
   }
 }
@@ -63,6 +93,8 @@ function normalizeRecipe(record, index = 0) {
   const emojiPool = ['🍅', '🥦', '🎃', '🥣', '🥕', '🥬', '🧀', '🥑']
   const tags = record.tags || []
   const ingredients = Array.isArray(record.ingredients) ? record.ingredients : []
+  const currentUserId = (store.getState().user || {}).id
+  const authorUserId = record.created_by_user_id || record.authorUserId || ''
   const steps = Array.isArray(record.steps)
     ? record.steps.map(item => typeof item === 'string' ? item : item.description || `步骤 ${item.step || ''}`)
     : []
@@ -89,12 +121,19 @@ function normalizeRecipe(record, index = 0) {
     nutrition: record.nutrition_info || '注重均衡摄入蛋白质、碳水与维生素。',
     rating: Number(record.rating || 4.8),
     madeCount: Number(record.times_made || 0),
+    isPublic: record.is_public !== false,
+    auditStatus: record.audit_status || (record.is_public === false ? 'private' : 'approved'),
+    authorUserId,
+    isMine: !!record.isMine || !!record.is_mine || (!!authorUserId && authorUserId === currentUserId),
     videoLabel: '查看完整视频'
   }
 }
 
-function isRemoteEnabled() {
-  return !!store.getToken()
+function runDataTask(remoteTask, localTask) {
+  if (isMockEnabled()) {
+    return localTask()
+  }
+  return remoteTask()
 }
 
 function syncProfileAndBabies(profile, babies) {
@@ -116,7 +155,12 @@ function login() {
   const remoteTask = async () => {
     let authData
 
-    try {
+    if (isDevLoginEnabled()) {
+      authData = await request('POST', '/auth/dev-login', {
+        openid: 'dev-openid-fixed',
+        nickname: '妈妈小厨'
+      }, { auth: false })
+    } else {
       const loginResult = await new Promise((resolve, reject) => {
         wx.login({
           success: resolve,
@@ -125,15 +169,7 @@ function login() {
       })
 
       authData = await request('POST', '/auth/wechat-login', {
-        code: loginResult.code,
-        userInfo: {
-          nickName: '妈妈小厨'
-        }
-      }, { auth: false })
-    } catch (error) {
-      authData = await request('POST', '/auth/dev-login', {
-        openid: `dev-openid-${Date.now()}`,
-        nickname: '妈妈小厨'
+        code: loginResult.code
       }, { auth: false })
     }
 
@@ -152,10 +188,7 @@ function login() {
     return store.getState().user
   }
 
-  return withFallback(
-    remoteTask,
-    () => Promise.resolve(store.login())
-  )
+  return runDataTask(remoteTask, () => Promise.resolve(store.login()))
 }
 
 function getOverview() {
@@ -172,8 +205,29 @@ function getOverview() {
     store.syncMadeCount(madeCountData.total || 0)
     const currentBaby = store.getCurrentBaby(store.getState())
 
-    if (currentBaby) {
-      try {
+    if (currentBaby && store.getConfirmedWeeklyPlan(currentBaby.id)) {
+      store.applyConfirmedWeeklyPlanToTodaySeed(store.getState(), currentBaby.id)
+    } else if (currentBaby) {
+      const currentPlanData = await request('GET', `/weekly-plan/current?baby_id=${encodeURIComponent(currentBaby.id)}`)
+      const currentPlan = normalizeWeeklyPlan(currentPlanData.weekly_recipes || [])
+
+      if (currentPlan.length) {
+        store.syncRemoteRecipes(mergeRecipes(store.getState().recipes, flattenPlanRecipes(currentPlan)))
+        const currentState = store.getState()
+        currentState.weeklyPlans[currentBaby.id] = currentPlan
+        if (currentPlanData.is_confirmed) {
+          currentState.confirmedWeeklyPlans[currentBaby.id] = {
+            weekKey: getCurrentWeekKey(),
+            confirmedAt: new Date().toISOString(),
+            plan: currentPlan
+          }
+          store.setState(currentState)
+          store.applyConfirmedWeeklyPlanToTodaySeed(store.getState(), currentBaby.id)
+        } else {
+          delete currentState.confirmedWeeklyPlans[currentBaby.id]
+          store.setState(currentState)
+        }
+      } else {
         const todayData = await request('GET', `/recommendation/today?baby_id=${encodeURIComponent(currentBaby.id)}`)
         const state = store.getState()
         const normalizedRecipes = []
@@ -187,27 +241,24 @@ function getOverview() {
         normalizedRecipes.push(...suggestions)
         const merged = mergeRecipes(state.recipes, normalizedRecipes)
         store.syncRemoteRecipes(merged)
-        state.todayRecommendationSeed[currentBaby.id] = {
+        const nextState = store.getState()
+        nextState.todayRecommendationSeed[currentBaby.id] = {
           breakfast: breakfast?.id,
           lunch: lunch?.id,
           dinner: dinner?.id,
           suggestions: suggestions.map(item => item.id)
         }
-        state.collections = collectionIds
-        store.setState(state)
-      } catch (error) {
-        // keep local fallback
+        store.setState(nextState)
       }
+      const latestState = store.getState()
+      latestState.collections = collectionIds
+      store.setState(latestState)
     }
 
     return store.getOverview()
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.getOverview())
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.getOverview()))
+  return runDataTask(remoteTask, () => Promise.resolve(store.getOverview()))
 }
 
 function translateRecipeFilters(params = {}) {
@@ -252,11 +303,7 @@ function getRecipes(params) {
     return normalized.length ? normalized : store.filterRecipes(params)
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.filterRecipes(params))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.filterRecipes(params)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.filterRecipes(params)))
 }
 
 function getMyRecipes(type) {
@@ -279,20 +326,29 @@ function getMyRecipes(type) {
       return normalized.length ? normalized : store.getMadeRecipes()
     }
 
+    if (type === 'created') {
+      const data = await request('GET', '/recipe/my/list')
+      const normalized = (data.recipes || []).map(item => ({
+        ...normalizeRecipe(item),
+        isMine: true
+      }))
+      if (normalized.length) {
+        store.syncRemoteRecipes(mergeRecipes(store.getState().recipes, normalized))
+      }
+      return normalized
+    }
+
     return getRecipes({})
   }
 
   const localTask = () => {
     if (type === 'collection') return Promise.resolve(store.getCollectedRecipes())
     if (type === 'made') return Promise.resolve(store.getMadeRecipes())
+    if (type === 'created') return Promise.resolve(store.getCreatedRecipes())
     return Promise.resolve(store.filterRecipes({}))
   }
 
-  if (!isRemoteEnabled()) {
-    return localTask()
-  }
-
-  return withFallback(remoteTask, localTask)
+  return runDataTask(remoteTask, localTask)
 }
 
 function getRecipeDetail(recipeId) {
@@ -308,11 +364,7 @@ function getRecipeDetail(recipeId) {
     return normalized
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.getRecipeById(recipeId))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.getRecipeById(recipeId)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.getRecipeById(recipeId)))
 }
 
 function swapMeal(babyId, mealType) {
@@ -336,11 +388,7 @@ function swapMeal(babyId, mealType) {
     return store.getTodayRecommendation(babyId, store.getState())
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.swapMeal(babyId, mealType))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.swapMeal(babyId, mealType)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.swapMeal(babyId, mealType)))
 }
 
 function toggleCollection(recipeId) {
@@ -354,11 +402,7 @@ function toggleCollection(recipeId) {
     return data.is_collected
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.toggleCollection(recipeId))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.toggleCollection(recipeId)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.toggleCollection(recipeId)))
 }
 
 function markRecipeMade(recipeId, babyId) {
@@ -379,11 +423,7 @@ function markRecipeMade(recipeId, babyId) {
     return true
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.markRecipeMade(recipeId, babyId))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.markRecipeMade(recipeId, babyId)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.markRecipeMade(recipeId, babyId)))
 }
 
 function switchBaby(babyId) {
@@ -408,11 +448,7 @@ function switchBaby(babyId) {
     return store.decorateBaby(store.getCurrentBaby(store.getState()))
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.switchBaby(babyId))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.switchBaby(babyId)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.switchBaby(babyId)))
 }
 
 function getGrowthData(babyId) {
@@ -428,11 +464,7 @@ function getGrowthData(babyId) {
     return store.getGrowthData(babyId)
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.getGrowthData(babyId))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.getGrowthData(babyId)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.getGrowthData(babyId)))
 }
 
 function addGrowthRecord(babyId, payload) {
@@ -446,53 +478,111 @@ function addGrowthRecord(babyId, payload) {
     return getGrowthData(babyId)
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.addGrowthRecord(babyId, payload))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.addGrowthRecord(babyId, payload)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.addGrowthRecord(babyId, payload)))
 }
 
-function getWeeklyPlan(babyId) {
+function getWeeklyPlan(babyId, options = {}) {
+  const existingPlan = (store.getState().weeklyPlans || {})[babyId]
+  const confirmedPlan = store.getConfirmedWeeklyPlan(babyId)
+  if (!options.requiredRecipeIds?.length && confirmedPlan && confirmedPlan.length) {
+    return Promise.resolve(confirmedPlan)
+  }
+  if (!options.requiredRecipeIds?.length && existingPlan && existingPlan.length) {
+    return Promise.resolve(existingPlan)
+  }
+
   const remoteTask = async () => {
+    if (!options.requiredRecipeIds?.length) {
+      const currentData = await request('GET', `/weekly-plan/current?baby_id=${encodeURIComponent(babyId)}`)
+      const currentPlan = normalizeWeeklyPlan(currentData.weekly_recipes || [])
+      if (currentPlan.length) {
+        store.syncRemoteRecipes(mergeRecipes(store.getState().recipes, flattenPlanRecipes(currentPlan)))
+        const currentState = store.getState()
+        currentState.weeklyPlans[babyId] = currentPlan
+        if (currentData.is_confirmed) {
+          currentState.confirmedWeeklyPlans[babyId] = {
+            weekKey: getCurrentWeekKey(),
+            confirmedAt: new Date().toISOString(),
+            plan: currentPlan
+          }
+        } else {
+          delete currentState.confirmedWeeklyPlans[babyId]
+        }
+        store.setState(currentState)
+        return currentPlan
+      }
+    }
+
     const data = await request('POST', '/weekly-plan/generate', {
       baby_id: babyId,
-      variant: 'default'
+      variant: 'default',
+      required_recipe_ids: options.requiredRecipeIds || []
     })
     const normalizedPlan = normalizeWeeklyPlan(data.weekly_recipes || [])
-    const state = store.getState()
-    store.syncRemoteRecipes(mergeRecipes(state.recipes, flattenPlanRecipes(normalizedPlan)))
-    state.weeklyPlans[babyId] = normalizedPlan
-    store.setState(state)
+    store.syncRemoteRecipes(mergeRecipes(store.getState().recipes, flattenPlanRecipes(normalizedPlan)))
+    const nextState = store.getState()
+    nextState.weeklyPlans[babyId] = normalizedPlan
+    if (data.is_confirmed) {
+      nextState.confirmedWeeklyPlans[babyId] = {
+        weekKey: getCurrentWeekKey(),
+        confirmedAt: new Date().toISOString(),
+        plan: normalizedPlan
+      }
+    } else {
+      delete nextState.confirmedWeeklyPlans[babyId]
+    }
+    store.setState(nextState)
     return normalizedPlan
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.getWeeklyPlan(babyId))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.getWeeklyPlan(babyId)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.getWeeklyPlan(babyId, options.requiredRecipeIds || [])))
 }
 
-function refreshWeeklyPlan(babyId) {
+function refreshWeeklyPlan(babyId, options = {}) {
   const remoteTask = async () => {
     const data = await request('POST', '/weekly-plan/generate', {
       baby_id: babyId,
-      variant: String(Date.now())
+      variant: String(Date.now()),
+      required_recipe_ids: options.requiredRecipeIds || []
     })
     const normalizedPlan = normalizeWeeklyPlan(data.weekly_recipes || [])
-    const state = store.getState()
-    store.syncRemoteRecipes(mergeRecipes(state.recipes, flattenPlanRecipes(normalizedPlan)))
-    state.weeklyPlans[babyId] = normalizedPlan
-    store.setState(state)
+    store.syncRemoteRecipes(mergeRecipes(store.getState().recipes, flattenPlanRecipes(normalizedPlan)))
+    const nextState = store.getState()
+    nextState.weeklyPlans[babyId] = normalizedPlan
+    if (data.is_confirmed) {
+      nextState.confirmedWeeklyPlans[babyId] = {
+        weekKey: getCurrentWeekKey(),
+        confirmedAt: new Date().toISOString(),
+        plan: normalizedPlan
+      }
+    } else {
+      delete nextState.confirmedWeeklyPlans[babyId]
+    }
+    store.setState(nextState)
     return normalizedPlan
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.refreshWeeklyPlan(babyId))
+  return runDataTask(remoteTask, () => Promise.resolve(store.refreshWeeklyPlan(babyId, options.requiredRecipeIds || [])))
+}
+
+function swapWeeklyPlanDay(babyId, dayIndex) {
+  const remoteTask = async () => {
+    const localPlan = store.swapWeeklyPlanDay(babyId, Number(dayIndex || 0))
+    const data = await request('POST', '/weekly-plan/save', {
+      baby_id: babyId,
+      weekly_recipes: serializeWeeklyPlan(localPlan),
+      is_confirmed: false
+    })
+    const normalizedPlan = normalizeWeeklyPlan(data.weekly_recipes || [])
+    store.syncRemoteRecipes(mergeRecipes(store.getState().recipes, flattenPlanRecipes(normalizedPlan)))
+    const nextState = store.getState()
+    nextState.weeklyPlans[babyId] = normalizedPlan
+    delete nextState.confirmedWeeklyPlans[babyId]
+    store.setState(nextState)
+    return normalizedPlan
   }
 
-  return withFallback(remoteTask, () => Promise.resolve(store.refreshWeeklyPlan(babyId)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.swapWeeklyPlanDay(babyId, Number(dayIndex || 0))))
 }
 
 function buildShoppingList(babyId) {
@@ -501,14 +591,23 @@ function buildShoppingList(babyId) {
       baby_id: babyId,
       variant: 'default'
     })
+    const normalizedPlan = normalizeWeeklyPlan(data.weekly_recipes || [])
+    if (normalizedPlan.length) {
+      store.syncRemoteRecipes(mergeRecipes(store.getState().recipes, flattenPlanRecipes(normalizedPlan)))
+      const nextState = store.getState()
+      nextState.weeklyPlans[babyId] = normalizedPlan
+      nextState.confirmedWeeklyPlans[babyId] = {
+        weekKey: getCurrentWeekKey(),
+        confirmedAt: new Date().toISOString(),
+        plan: normalizedPlan
+      }
+      store.setState(nextState)
+      store.applyConfirmedWeeklyPlanToTodaySeed(store.getState(), babyId)
+    }
     return data.shopping_list || []
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.buildShoppingList(babyId))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.buildShoppingList(babyId)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.buildShoppingList(babyId)))
 }
 
 function saveBaby(payload) {
@@ -519,6 +618,7 @@ function saveBaby(payload) {
       birthDate: payload.birthDate,
       allergies: payload.allergies || [],
       dietaryPreferences: payload.dietaryPreferences || [],
+      avatarUrl: payload.avatarImage || null,
       isActive: payload.active !== false
     }
 
@@ -532,11 +632,7 @@ function saveBaby(payload) {
     return store.syncRemoteBabies((babiesData.babies || []).map(mapBaby))
   }
 
-  if (!isRemoteEnabled()) {
-    return Promise.resolve(store.saveBaby(payload))
-  }
-
-  return withFallback(remoteTask, () => Promise.resolve(store.saveBaby(payload)))
+  return runDataTask(remoteTask, () => Promise.resolve(store.saveBaby(payload)))
 }
 
 function toggleElderMode(value) {
@@ -544,7 +640,118 @@ function toggleElderMode(value) {
 }
 
 function saveUserProfile(payload) {
-  return Promise.resolve(store.saveUserProfile(payload))
+  const remoteTask = async () => {
+    const data = await request('PUT', '/auth/profile', {
+      nickname: payload.nickname,
+      avatarUrl: payload.avatarImage,
+      bio: payload.bio
+    })
+
+    const mergedUser = {
+      ...data,
+      bio: payload.bio,
+      avatarImage: payload.avatarImage || data.avatar_url
+    }
+
+    return store.syncRemoteUser(mergedUser)
+  }
+
+  return runDataTask(remoteTask, () => Promise.resolve(store.saveUserProfile(payload)))
+}
+
+function normalizeFamilyMember(member = {}) {
+  return {
+    ...member,
+    user: member.user || member.users || {}
+  }
+}
+
+function getCurrentFamily() {
+  const remoteTask = async () => {
+    const data = await request('GET', '/family/current')
+    const payload = {
+      family: data.family,
+      myRole: data.my_role,
+      member: data.member,
+      members: (data.members || []).map(normalizeFamilyMember)
+    }
+    store.syncRemoteFamily(payload)
+    return payload
+  }
+
+  return runDataTask(remoteTask, () => Promise.resolve(store.getCurrentFamily()))
+}
+
+function createFamilyInvite(payload = {}) {
+  const remoteTask = async () => {
+    const data = await request('POST', '/family/invite', {
+      role: payload.role || 'editor',
+      relation: payload.relation || ''
+    })
+    return data
+  }
+
+  return runDataTask(remoteTask, () => Promise.resolve(store.createFamilyInvite(payload)))
+}
+
+function joinFamilyByInvite(code) {
+  const remoteTask = async () => {
+    await request('POST', '/family/join', { code })
+    return getCurrentFamily()
+  }
+
+  return runDataTask(remoteTask, () => Promise.resolve(store.joinFamilyByInvite(code)))
+}
+
+function updateFamilyName(name) {
+  const remoteTask = async () => {
+    await request('PATCH', '/family/name', { name })
+    return getCurrentFamily()
+  }
+
+  return runDataTask(remoteTask, () => Promise.resolve(store.updateFamilyName(name)))
+}
+
+function createRecipe(payload) {
+  const remoteTask = async () => {
+    const data = await request('POST', '/recipe/create', payload)
+    const normalized = {
+      ...normalizeRecipe(data.recipe),
+      isMine: true
+    }
+    store.syncRemoteRecipes(mergeRecipes(store.getState().recipes, [normalized]))
+    return normalized
+  }
+
+  return runDataTask(remoteTask, () => Promise.resolve(store.createRecipe(payload)))
+}
+
+function updateRecipe(recipeId, payload) {
+  const remoteTask = async () => {
+    const data = await request('PATCH', `/recipe/${recipeId}`, payload)
+    const normalized = {
+      ...normalizeRecipe(data.recipe),
+      isMine: true
+    }
+    store.syncRemoteRecipes(mergeRecipes(store.getState().recipes, [normalized]))
+    return normalized
+  }
+
+  return runDataTask(remoteTask, () => Promise.resolve(store.updateRecipe(recipeId, payload)))
+}
+
+function updateRecipeVisibility(recipeId, isPublic) {
+  const remoteTask = async () => {
+    const data = await request('PATCH', `/recipe/${recipeId}/visibility`, { isPublic })
+    const normalized = {
+      ...normalizeRecipe(data.recipe),
+      isMine: true
+    }
+    store.syncRemoteRecipes(mergeRecipes(store.getState().recipes, [normalized]))
+    return normalized
+  }
+
+  return runDataTask(remoteTask, () => Promise.resolve(store.updateRecipeVisibility(recipeId, isPublic)))
 }
 
 function toQueryString(params = {}) {
@@ -586,6 +793,23 @@ function flattenPlanRecipes(plan) {
   return recipes.filter(Boolean)
 }
 
+function serializeWeeklyPlan(plan) {
+  return (plan || []).map(day => ({
+    day_label: day.dayLabel,
+    date: day.date || '',
+    breakfast_id: day.breakfast?.id || null,
+    lunch_id: day.lunch?.id || null,
+    dinner_id: day.dinner?.id || null
+  }))
+}
+
+function getCurrentWeekKey(date = new Date()) {
+  const current = new Date(date)
+  const weekDay = current.getDay() || 7
+  current.setDate(current.getDate() - weekDay + 1)
+  return current.toISOString().slice(0, 10)
+}
+
 module.exports = {
   login,
   getOverview,
@@ -600,8 +824,20 @@ module.exports = {
   addGrowthRecord,
   getWeeklyPlan,
   refreshWeeklyPlan,
+  swapWeeklyPlanDay,
   buildShoppingList,
+  getCurrentFamily,
+  createFamilyInvite,
+  joinFamilyByInvite,
+  updateFamilyName,
   saveBaby,
   saveUserProfile,
-  toggleElderMode
+  createRecipe,
+  updateRecipe,
+  updateRecipeVisibility,
+  toggleElderMode,
+  isMockEnabled,
+  setMockEnabled,
+  isDevLoginEnabled,
+  setDevLoginEnabled
 }

@@ -4,7 +4,12 @@ Page({
   data: {
     currentBaby: {},
     babies: [],
-    today: {}
+    today: {},
+    hasConfirmedWeeklyPlan: false,
+    showPlanPicker: false,
+    planRecipeGroups: [],
+    selectedPlanRecipeIds: [],
+    loadingPlanPicker: false
   },
 
   onShow() {
@@ -20,7 +25,8 @@ Page({
       this.setData({
         currentBaby: res.currentBaby,
         babies: res.babies,
-        today: res.todayRecommendation
+        today: res.todayRecommendation,
+        hasConfirmedWeeklyPlan: !!res.hasConfirmedWeeklyPlan
       })
     })
   },
@@ -54,6 +60,60 @@ Page({
   },
 
   openWeeklyPlan() {
+    this.setData({ showPlanPicker: true, loadingPlanPicker: true })
+    Promise.all([
+      api.getMyRecipes('collection').catch(() => []),
+      api.getMyRecipes('made').catch(() => []),
+      api.getMyRecipes('created').catch(() => [])
+    ]).then(([collections, made, created]) => {
+      this.setData({
+        loadingPlanPicker: false,
+        planRecipeGroups: [
+          { key: 'collection', title: '我的收藏', recipes: collections.map(item => ({ ...item, checked: this.data.selectedPlanRecipeIds.includes(item.id) })) },
+          { key: 'made', title: '做过食谱', recipes: made.map(item => ({ ...item, checked: this.data.selectedPlanRecipeIds.includes(item.id) })) },
+          { key: 'created', title: '我的食谱', recipes: created.map(item => ({ ...item, checked: this.data.selectedPlanRecipeIds.includes(item.id) })) }
+        ]
+      })
+    })
+  },
+
+  closePlanPicker() {
+    this.setData({
+      showPlanPicker: false,
+      selectedPlanRecipeIds: []
+    })
+  },
+
+  togglePlanRecipe(event) {
+    const recipeId = event.currentTarget.dataset.id
+    const selected = this.data.selectedPlanRecipeIds.slice()
+    const index = selected.indexOf(recipeId)
+    if (index >= 0) {
+      selected.splice(index, 1)
+    } else {
+      selected.push(recipeId)
+    }
+    this.setData({
+      selectedPlanRecipeIds: selected,
+      planRecipeGroups: this.data.planRecipeGroups.map(group => ({
+        ...group,
+        recipes: group.recipes.map(item => ({
+          ...item,
+          checked: selected.includes(item.id)
+        }))
+      }))
+    })
+  },
+
+  generateWeeklyPlanWithSelection() {
+    const requiredRecipeIds = this.data.selectedPlanRecipeIds.slice()
+    api.refreshWeeklyPlan(this.data.currentBaby.id, { requiredRecipeIds }).then(() => {
+      this.setData({ showPlanPicker: false, selectedPlanRecipeIds: [] })
+      wx.navigateTo({ url: '/pages/weekly-plan/index' })
+    })
+  },
+
+  viewWeeklyPlan() {
     wx.navigateTo({ url: '/pages/weekly-plan/index' })
   },
 

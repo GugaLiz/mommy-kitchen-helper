@@ -10,10 +10,13 @@
   </view>
 
   <view class="panel day-card" wx:for="{{plan}}" wx:key="dayLabel">
-    <view class="day-title">{{item.dayLabel}} {{item.shortDate}}</view>
-    <view class="meal-line">🥣 早餐：{{item.breakfast.name}}</view>
-    <view class="meal-line">☀️ 午餐：{{item.lunch.name}}</view>
-    <view class="meal-line">🌙 晚餐：{{item.dinner.name}}</view>
+    <view class="day-card-head">
+      <view class="day-title">{{item.dayLabel}} {{item.shortDate}}</view>
+      <view class="pill-action day-swap" data-index="{{index}}" bindtap="swapDayPlan">换一换</view>
+    </view>
+    <view class="meal-line">早餐：{{item.breakfast.name}}</view>
+    <view class="meal-line">午餐：{{item.lunch.name}}</view>
+    <view class="meal-line">晚餐：{{item.dinner.name}}</view>
   </view>
 
   <button class="primary-btn center-btn" bindtap="showShoppingList">一键生成备菜清单</button>
@@ -23,7 +26,9 @@
   <view class="floating-sheet shopping-sheet" wx:if="{{showList}}">
     <view class="row-between">
       <view class="section-title">本周备菜清单</view>
-      <view class="close-pill" bindtap="hideShoppingList">关闭</view>
+      <view class="close-icon-btn" bindtap="hideShoppingList">
+        <text class="close-icon-text">×</text>
+      </view>
     </view>
     <scroll-view scroll-y class="shopping-scroll">
       <view class="shopping-row" wx:for="{{shoppingList}}" wx:key="ingredient">

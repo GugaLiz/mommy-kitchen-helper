@@ -246,6 +246,13 @@ html { font-size: calc(100vw / 8.75); } /* 375px时 1rem = 42.85px */
 ├── 食谱库
 ├── 生长记录
 └── 我的
+
+“我的”页二级入口（新增）
+├── 我的家庭
+│   ├── 家庭信息
+│   ├── 家庭成员
+│   ├── 邀请家人
+│   └── 输入邀请码加入
 ```
 
 ---
@@ -564,6 +571,57 @@ html { font-size: calc(100vw / 8.75); } /* 375px时 1rem = 42.85px */
 
 ---
 
+### 页面 6-1：我的家庭（新增）
+
+**功能**：支持妈妈邀请爸爸/老人加入同一个家庭，共享宝宝档案、周计划、生长记录等数据，不需要重复创建
+
+**页面定位**：
+- 入口放在【我的】页中，建议位于“我的宝宝”模块下方、“我的内容”模块上方
+- 未加入家庭时，展示“创建家庭”和“输入邀请码加入”
+- 已加入家庭时，展示家庭信息、成员列表、邀请入口
+
+**布局结构**：
+```
+┌─────────────────────────────────┐
+│ [← 返回]             我的家庭    │
+├─────────────────────────────────┤
+│ 家庭名称：小宝一家               │
+│ 我的身份：创建者 / 妈妈          │
+│ 成员数：2人                     │
+│ [邀请家人]   [编辑家庭名]        │
+│                                 │
+│ 家庭成员                         │
+│ ┌─────────────────────────────┐ │
+│ │ [头像] 妈妈小厨   创建者      │ │
+│ │ [头像] 爸爸阿杰   可编辑      │ │
+│ └─────────────────────────────┘ │
+│                                 │
+│ 已共享内容                       │
+│ · 宝宝档案                       │
+│ · 生长记录                       │
+│ · 本周菜单 / 备菜清单            │
+│ · 做过食谱 / 我的食谱            │
+│                                 │
+│ [输入邀请码加入家庭]             │
+└─────────────────────────────────┘
+```
+
+**交互说明**：
+
+| 元素 | 点击行为 |
+|------|---------|
+| 邀请家人 | 生成 6 位邀请码，24 小时有效，默认一次使用 |
+| 输入邀请码加入家庭 | 输入邀请码后加入家庭，自动同步共享数据 |
+| 家庭成员卡片 | 查看成员角色，创建者可调整权限/移除 |
+| 编辑家庭名 | 修改家庭名称 |
+
+**角色设计**：
+- `owner`：家庭创建者，可邀请成员、调整角色、移除成员
+- `editor`：可编辑宝宝、录入生长数据、生成周计划、维护共享食谱
+- `viewer`：仅查看，不可修改共享数据
+
+---
+
 ### 页面 7：周计划生成页
 
 **布局结构**：
@@ -619,6 +677,12 @@ html { font-size: calc(100vw / 8.75); } /* 375px时 1rem = 42.85px */
 ### 流程 4：生成备菜清单流程
 ```
 周计划页 → 确认本周食谱 → 点击"生成备菜清单" → 展示购物清单 → 截图/分享
+```
+
+### 流程 5：家庭共享流程（新增）
+```
+妈妈登录 → 创建家庭 → 创建宝宝档案 → 进入“我的家庭”点击邀请家人 → 生成邀请码 →
+爸爸登录 → 输入邀请码加入家庭 → 自动看到同一家庭下的宝宝、周计划、生长记录和共享食谱
 ```
 
 ---
@@ -1144,6 +1208,13 @@ html { font-size: calc(100vw / 8.75); } /* 375px时 1rem = 42.85px */
 - [ ] 监控和日志
 - [ ] 率限流和反爬虫
 
+**家庭共享（建议并入第 5 阶段）**：
+- [ ] 家庭表 / 家庭成员表 / 邀请码表
+- [ ] 我的家庭页面
+- [ ] 邀请码创建与加入流程
+- [ ] 家庭角色权限控制
+- [ ] 现有宝宝 / 生长记录 / 周计划数据迁移到家庭维度
+
 **交付物**：应用运行流畅，用户体验良好
 
 ---
@@ -1350,11 +1421,56 @@ jobs:
 }
 ```
 
+##### 1-1. 家庭表（families）【新增】
+```javascript
+{
+  _id: ObjectId,
+  name: String,                // 家庭名称，如“小宝一家”
+  owner_user_id: ObjectId,     // 家庭创建者
+  status: String,              // active / dissolved
+  created_at: Timestamp,
+  updated_at: Timestamp
+}
+```
+
+##### 1-2. 家庭成员表（family_members）【新增】
+```javascript
+{
+  _id: ObjectId,
+  family_id: ObjectId,
+  user_id: ObjectId,
+  role: String,                // owner / editor / viewer
+  relation: String,            // 妈妈 / 爸爸 / 外婆 / 爷爷等
+  status: String,              // active / removed
+  joined_at: Timestamp,
+  created_at: Timestamp,
+  updated_at: Timestamp
+}
+```
+
+##### 1-3. 家庭邀请码表（family_invites）【新增】
+```javascript
+{
+  _id: ObjectId,
+  family_id: ObjectId,
+  code: String,                // 6 位邀请码
+  created_by_user_id: ObjectId,
+  role_to_grant: String,       // editor / viewer
+  expires_at: Timestamp,       // 24 小时有效
+  used_by_user_id: ObjectId,
+  used_at: Timestamp,
+  status: String,              // active / used / expired / cancelled
+  created_at: Timestamp,
+  updated_at: Timestamp
+}
+```
+
 ##### 2. 宝宝档案表（babies）
 ```javascript
 {
   _id: ObjectId,
-  userId: ObjectId,            // 关联用户 ID
+  userId: ObjectId,            // 兼容旧字段，保留创建人
+  family_id: ObjectId,         // 新增：所属家庭 ID
   nickname: String,            // 宝宝昵称
   gender: String,              // 性别 (male/female)
   birthDate: Date,             // 出生日期
@@ -1432,6 +1548,7 @@ jobs:
 ```javascript
 {
   _id: ObjectId,
+  family_id: ObjectId,         // 新增：所属家庭，共享制作记录
   user_id: ObjectId,           // 用户 ID
   baby_id: ObjectId,           // 宝宝 ID
   recipe_id: ObjectId,         // 食谱 ID
@@ -1450,6 +1567,7 @@ jobs:
 ```javascript
 {
   _id: ObjectId,
+  family_id: ObjectId,         // 新增：所属家庭
   baby_id: ObjectId,           // 宝宝 ID
   user_id: ObjectId,           // 用户 ID
   
@@ -1499,6 +1617,7 @@ jobs:
 ```javascript
 {
   _id: ObjectId,
+  family_id: ObjectId,         // 新增：所属家庭
   user_id: ObjectId,
   baby_id: ObjectId,
   
@@ -1603,6 +1722,85 @@ Response: { success: Boolean }
 ##### 7. 删除宝宝档案
 ```
 DELETE /api/baby/{babyId}
+Headers: { Authorization: "Bearer {token}" }
+Response: { success: Boolean }
+```
+
+#### 家庭共享接口（新增）
+
+##### 7-1. 创建家庭
+```
+POST /api/family/create
+Headers: { Authorization: "Bearer {token}" }
+Request: {
+  name: String
+}
+Response: {
+  family_id: String,
+  success: Boolean
+}
+```
+
+##### 7-2. 获取当前家庭信息
+```
+GET /api/family/current
+Headers: { Authorization: "Bearer {token}" }
+Response: {
+  family: Family,
+  my_role: String,
+  members: Array<FamilyMember>
+}
+```
+
+##### 7-3. 生成邀请码
+```
+POST /api/family/invite
+Headers: { Authorization: "Bearer {token}" }
+Request: {
+  role: "editor" | "viewer",
+  relation: String
+}
+Response: {
+  code: String,
+  expires_at: Timestamp
+}
+```
+
+##### 7-4. 通过邀请码加入家庭
+```
+POST /api/family/join
+Headers: { Authorization: "Bearer {token}" }
+Request: {
+  code: String
+}
+Response: {
+  family_id: String,
+  success: Boolean
+}
+```
+
+##### 7-5. 获取家庭成员
+```
+GET /api/family/members
+Headers: { Authorization: "Bearer {token}" }
+Response: {
+  members: Array<FamilyMember>
+}
+```
+
+##### 7-6. 更新成员角色
+```
+PATCH /api/family/member/{memberId}/role
+Headers: { Authorization: "Bearer {token}" }
+Request: {
+  role: "editor" | "viewer"
+}
+Response: { success: Boolean }
+```
+
+##### 7-7. 移除家庭成员
+```
+DELETE /api/family/member/{memberId}
 Headers: { Authorization: "Bearer {token}" }
 Response: { success: Boolean }
 ```
@@ -1800,6 +1998,204 @@ Response: {
 ```
 
 ---
+
+### 家庭共享功能落地说明（新增）
+
+#### 共享与不共享范围
+
+- 共享：
+  - 宝宝档案
+  - 生长记录
+  - 周计划 / 备菜清单
+  - 做过食谱
+  - 我的食谱（建议支持“共享到家庭”）
+- 暂不共享：
+  - 用户昵称、头像、个人简介
+  - 登录态
+  - 个性化设置
+  - 收藏食谱（建议先保留个人维度，避免互相干扰推荐）
+
+#### 当前项目的数据迁移建议
+
+从现有单人模型升级到家庭模型时，建议采用以下方案：
+
+1. 为每个现有用户自动创建一个默认家庭
+2. 将该用户当前已有宝宝迁移到这个默认家庭
+3. 将生长记录、周计划、做过记录补写 `family_id`
+4. 原 `babies.userId` 不删除，保留为“创建人”
+5. 新增读取接口时，统一按“当前用户所属家庭”过滤
+
+#### MVP 范围建议
+
+第一版先做：
+- 一个用户只能加入一个家庭
+- 一个家庭可有多个成员
+- 角色仅支持 `owner / editor / viewer`
+- 邀请码加入
+- 宝宝 / 生长记录 / 周计划共享
+
+第二版再做：
+- 一个用户可切换多个家庭
+- 邀请链接 deep link
+- 家庭共享收藏
+- 家庭动态 / 操作日志
+
+#### 家庭共享技术落地方案（新增）
+
+##### 一、数据库迁移顺序
+
+建议按以下顺序执行，避免中途出现字段缺失或关联不上：
+
+1. 创建 `families`
+2. 创建 `family_members`
+3. 创建 `family_invites`
+4. 为 `babies` 增加 `family_id`
+5. 为 `growth_records` 增加 `family_id`
+6. 为 `weekly_plan_snapshots` / `weekly_plans` 增加 `family_id`
+7. 为 `made_recipes` 增加 `family_id`
+8. 执行“历史数据回填脚本”
+
+##### 二、历史数据迁移策略
+
+适用于当前项目已有单用户数据的情况：
+
+1. 为每个 `users` 生成一个默认家庭：
+   - 名称可先用“{昵称}的家庭”
+   - `owner_user_id = users.id`
+2. 为每个用户插入一条 `family_members`：
+   - `role = owner`
+3. 将 `babies.user_id` 对应的宝宝回填到该用户默认家庭
+4. 将该宝宝对应的：
+   - `growth_records`
+   - `weekly_plan_snapshots`
+   - `made_recipes`
+   回填对应 `family_id`
+5. 后续所有宝宝/记录/周计划查询改为按 `family_id` + `baby_id` 过滤
+
+##### 三、后端改造清单
+
+###### 1. 认证层
+
+- 微信登录成功后，除了返回用户信息，还需要带回：
+  - 当前所属家庭 ID
+  - 当前家庭角色
+  - 是否已加入家庭
+- 若用户尚无家庭：
+  - 自动创建默认家庭
+  - 或在首次登录后引导创建家庭
+
+###### 2. 家庭模块
+
+新增后端模块：
+- `GET /api/family/current`
+- `POST /api/family/create`
+- `POST /api/family/invite`
+- `POST /api/family/join`
+- `GET /api/family/members`
+- `PATCH /api/family/member/:memberId/role`
+- `DELETE /api/family/member/:memberId`
+
+###### 3. 宝宝模块
+
+现有 `baby/create`、`baby/list`、`baby/update` 需要改为：
+- 默认写入当前用户所在 `family_id`
+- 查询时按 `family_id` 返回全家共享宝宝
+- 权限校验改为“当前用户是否属于该家庭”
+
+###### 4. 生长记录模块
+
+现有 `growth-record/add`、`growth-record/history` 需要改为：
+- 写入 `family_id`
+- 查询时按 `family_id + baby_id`
+- 权限校验以家庭成员身份为准，而不是单纯 `user_id`
+
+###### 5. 周计划模块
+
+现有 `weekly-plan/generate`、`weekly-plan/current`、`weekly-plan/save`、`weekly-plan/shopping-list` 需要改为：
+- 保存时附带 `family_id`
+- 读取本周菜单时按 `family_id + baby_id + week_start`
+- 爸爸和妈妈看到同一份本周菜单
+
+###### 6. 食谱模块
+
+- 收藏：建议暂时保持个人维度，不用立即家庭共享
+- 做过记录：建议升级为家庭共享，保留 `user_id` 记录“谁操作的”
+- 自制食谱：建议增加 `shared_scope`
+  - `private`
+  - `family`
+  - `public`
+
+##### 四、前端改造清单
+
+###### 1. 登录后全局状态
+
+全局状态新增：
+- `currentFamily`
+- `familyMembers`
+- `myFamilyRole`
+- `hasFamily`
+
+###### 2. 我的页面
+
+新增入口：
+- `我的家庭`
+
+新增页面能力：
+- 查看家庭信息
+- 查看成员列表
+- 生成邀请码
+- 输入邀请码加入家庭
+- 根据角色展示管理按钮
+
+###### 3. 首页
+
+可选增强：
+- 宝宝区域下方显示“当前家庭：XXX”
+- 若用户处于 `viewer`，则隐藏“可编辑型操作”
+
+###### 4. 生长记录 / 周计划 / 宝宝档案
+
+这些页面不需要大改 UI，但需要统一改查询来源：
+- 不再理解为“我个人的数据”
+- 改为“我当前家庭共享的数据”
+
+##### 五、权限策略建议
+
+| 场景 | owner | editor | viewer |
+|------|-------|--------|--------|
+| 查看家庭成员 | ✅ | ✅ | ✅ |
+| 邀请新成员 | ✅ | ❌ | ❌ |
+| 修改家庭名称 | ✅ | ❌ | ❌ |
+| 编辑宝宝档案 | ✅ | ✅ | ❌ |
+| 记录生长数据 | ✅ | ✅ | ❌ |
+| 生成周计划 | ✅ | ✅ | ❌ |
+| 查看周计划 | ✅ | ✅ | ✅ |
+| 查看生长记录 | ✅ | ✅ | ✅ |
+
+##### 六、推荐开发顺序
+
+建议按下面顺序落地，风险最低：
+
+1. 数据库新增 `families / family_members / family_invites`
+2. 为 `babies / growth_records / weekly_plan_snapshots` 增加 `family_id`
+3. 写历史数据迁移脚本
+4. 后端先完成 `family/current`、`family/create`、`family/join`
+5. 再改 `baby/list`、`growth-record/history`、`weekly-plan/current`
+6. 前端新增【我的家庭】页面
+7. 前端切换到基于家庭读取共享数据
+8. 最后补角色权限控制和邀请码管理细节
+
+##### 七、联调验收点
+
+联调时至少覆盖以下用例：
+
+1. 妈妈创建家庭并创建宝宝
+2. 爸爸通过邀请码加入
+3. 爸爸登录后能看到同一个宝宝
+4. 爸爸新增一条生长记录，妈妈刷新后可见
+5. 妈妈生成本周菜单，爸爸刷新后可见
+6. 爸爸在 `viewer` 角色下不可编辑
+7. 邀请码过期或重复使用时提示正确
 
 ### 服务端业务逻辑
 

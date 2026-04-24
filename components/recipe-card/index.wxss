@@ -6,6 +6,10 @@
   margin-bottom: 20rpx;
 }
 
+.recipe-card.is-mine {
+  padding-bottom: 72rpx;
+}
+
 .recipe-cover {
   width: 120rpx;
   height: 120rpx;
@@ -48,4 +52,76 @@
   background: #fff3de;
   color: #d4684f;
   font-size: 20rpx;
+}
+
+.owner-actions {
+  position: absolute;
+  right: 20rpx;
+  bottom: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  z-index: 3;
+}
+
+.owner-action {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.owner-action-icon {
+  font-size: 20rpx;
+  line-height: 1;
+}
+
+.owner-pencil {
+  position: relative;
+  width: 18rpx;
+  height: 6rpx;
+  border-radius: 999rpx;
+  background: #c66c25;
+  transform: rotate(-32deg);
+}
+
+.owner-pencil::before {
+  content: '';
+  position: absolute;
+  left: -8rpx;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-top: 3rpx solid transparent;
+  border-bottom: 3rpx solid transparent;
+  border-right: 8rpx solid #f6d6b2;
+}
+
+.owner-pencil::after {
+  content: '';
+  position: absolute;
+  right: -5rpx;
+  top: 0;
+  width: 5rpx;
+  height: 6rpx;
+  border-radius: 0 999rpx 999rpx 0;
+  background: #ffb24c;
+}
+
+.edit-action {
+  background: #fff3de;
+  color: #c66c25;
+}
+
+.visibility-action.public {
+  background: #eaf9ef;
+  color: #2f8e6d;
+}
+
+.visibility-action.private {
+  background: #f6f1eb;
+  color: #8a8177;
 }

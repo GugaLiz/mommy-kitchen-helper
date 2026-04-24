@@ -14,11 +14,24 @@ router.use(authenticate)
 
 router.get('/list', async (req, res) => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('babies')
       .select('*')
-      .eq('user_id', req.user.id)
       .order('created_at', { ascending: false })
+    const familyId = req.family?.id
+
+    query = familyId ? query.eq('family_id', familyId) : query.eq('user_id', req.user.id)
+    let { data, error } = await query
+
+    if (!error && familyId && (!data || !data.length)) {
+      const fallback = await supabase
+        .from('babies')
+        .select('*')
+        .eq('user_id', req.user.id)
+        .order('created_at', { ascending: false })
+      data = fallback.data || []
+      error = fallback.error
+    }
 
     if (error) throw error
 
@@ -45,11 +58,13 @@ router.post('/create', async (req, res) => {
       .insert([
         {
           user_id: req.user.id,
+          family_id: req.family?.id || null,
           nickname: payload.nickname,
           gender: toDbGender(payload.gender),
           birth_date: payload.birthDate,
           allergies: payload.allergies || [],
           dietary_preferences: payload.dietaryPreferences || [],
+          avatar_url: payload.avatarUrl || null,
           is_active: payload.isActive ?? true
         }
       ])
@@ -59,11 +74,12 @@ router.post('/create', async (req, res) => {
     if (error) throw error
 
     if (created.is_active) {
-      await supabase
+      let updateQuery = supabase
         .from('babies')
         .update({ is_active: false })
-        .eq('user_id', req.user.id)
         .neq('id', created.id)
+      updateQuery = req.family?.id ? updateQuery.eq('family_id', req.family.id) : updateQuery.eq('user_id', req.user.id)
+      await updateQuery
     }
 
     return res.json({
@@ -85,6 +101,31 @@ router.put('/:babyId', async (req, res) => {
     const payload = req.body || {}
     const { babyId } = req.params
 
+    let ownershipQuery = supabase
+      .from('babies')
+      .select('*')
+      .eq('id', babyId)
+    ownershipQuery = req.family?.id ? ownershipQuery.eq('family_id', req.family.id) : ownershipQuery.eq('user_id', req.user.id)
+    let { data: current, error: currentError } = await ownershipQuery.maybeSingle()
+
+    if ((!current || currentError) && req.family?.id) {
+      const fallback = await supabase
+        .from('babies')
+        .select('*')
+        .eq('id', babyId)
+        .eq('user_id', req.user.id)
+        .maybeSingle()
+      current = fallback.data
+      currentError = fallback.error
+    }
+
+    if (currentError || !current) {
+      return res.status(404).json({
+        code: 404,
+        message: 'Baby not found'
+      })
+    }
+
     const { data: updated, error } = await supabase
       .from('babies')
       .update({
@@ -93,21 +134,23 @@ router.put('/:babyId', async (req, res) => {
         birth_date: payload.birthDate,
         allergies: payload.allergies || [],
         dietary_preferences: payload.dietaryPreferences || [],
-        is_active: payload.isActive ?? true
+        avatar_url: payload.avatarUrl || null,
+        is_active: payload.isActive ?? true,
+        family_id: current.family_id || req.family?.id || null
       })
       .eq('id', babyId)
-      .eq('user_id', req.user.id)
       .select()
       .single()
 
     if (error) throw error
 
     if (updated.is_active) {
-      await supabase
+      let updateQuery = supabase
         .from('babies')
         .update({ is_active: false })
-        .eq('user_id', req.user.id)
         .neq('id', updated.id)
+      updateQuery = updated.family_id ? updateQuery.eq('family_id', updated.family_id) : updateQuery.eq('user_id', req.user.id)
+      await updateQuery
     }
 
     return res.json({

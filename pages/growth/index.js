@@ -6,12 +6,14 @@ Page({
   data: {
     baby: {},
     latestRecord: {},
+    hasGrowthRecord: false,
     change: {},
     records: [],
     historyRecords: [],
     analysis: '',
     recommendationCards: [],
     chartData: null,
+    chartList: [],
     measureLabel: '身高',
     showForm: false,
     form: {
@@ -31,17 +33,21 @@ Page({
       wx.navigateTo({ url: '/pages/baby-edit/index?mode=create' })
       return
     }
-    api.getGrowthData(currentBaby.id).then(res => {
-      this.setData({
-        baby: res.baby,
-        latestRecord: res.latestRecord || {},
-        change: res.change,
-        records: res.records,
-        historyRecords: res.records.slice().reverse(),
-        analysis: res.analysis,
-        recommendationCards: res.recommendationCards,
-        chartData: res.chartData || null,
-        measureLabel: res.measureLabel || '身高'
+    api.getRecipes({ onlyCurrentBaby: true }).catch(() => []).then(() => {
+      api.getGrowthData(currentBaby.id).then(res => {
+        this.setData({
+          baby: res.baby,
+          latestRecord: res.latestRecord || {},
+          hasGrowthRecord: !!(res.latestRecord && res.latestRecord.id),
+          change: res.change,
+          records: res.records,
+          historyRecords: res.records.slice().reverse(),
+          analysis: res.analysis,
+          recommendationCards: res.recommendationCards,
+          chartData: res.chartData || null,
+          chartList: res.chartList || (res.chartData ? [res.chartData] : []),
+          measureLabel: res.measureLabel || '身高'
+        })
       })
     })
   },

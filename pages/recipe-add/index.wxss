@@ -1,0 +1,211 @@
+.recipe-add-page {
+  padding-bottom: 48rpx;
+}
+
+.hero-card {
+  position: relative;
+  overflow: hidden;
+  padding: 30rpx;
+  margin-bottom: 22rpx;
+  display: flex;
+  align-items: center;
+  gap: 22rpx;
+  background:
+    radial-gradient(circle at 88% 20%, rgba(255, 186, 89, 0.42), transparent 34%),
+    linear-gradient(135deg, #fff4df 0%, #fffdf8 56%, #eafff1 100%);
+}
+
+.hero-copy {
+  flex: 1;
+}
+
+.hero-kicker {
+  display: inline-flex;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 157, 60, 0.14);
+  color: #c66c25;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.hero-title {
+  margin-top: 18rpx;
+  font-size: 38rpx;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.hero-desc {
+  margin-top: 12rpx;
+  color: #7d6d61;
+  font-size: 24rpx;
+  line-height: 1.65;
+}
+
+.hero-bowl {
+  width: 132rpx;
+  height: 132rpx;
+  border-radius: 42rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 70rpx;
+  box-shadow: 0 18rpx 34rpx rgba(212, 104, 79, 0.12);
+}
+
+.form-card,
+.share-card {
+  padding: 24rpx;
+  margin-bottom: 22rpx;
+}
+
+.icon-picker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14rpx;
+  margin-bottom: 18rpx;
+}
+
+.icon-option {
+  height: 76rpx;
+  border-radius: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff7ed;
+  border: 2rpx solid transparent;
+  font-size: 40rpx;
+}
+
+.icon-option.active {
+  background: #fff1dc;
+  border-color: #ff9d3c;
+  box-shadow: 0 10rpx 22rpx rgba(255, 157, 60, 0.16);
+}
+
+.field-group {
+  margin-top: 24rpx;
+}
+
+.first-field {
+  margin-top: 0;
+}
+
+.field-row {
+  display: flex;
+  gap: 18rpx;
+}
+
+.field-group.half {
+  flex: 1;
+}
+
+.field-label {
+  margin-bottom: 12rpx;
+  color: #5f5147;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+
+.field-input {
+  height: 82rpx;
+  padding: 0 22rpx;
+  border-radius: 22rpx;
+  background: #f8f4ef;
+}
+
+.tag-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+
+.tag-option {
+  padding: 12rpx 20rpx;
+  border-radius: 999rpx;
+  background: #fff7ed;
+  color: #8a8177;
+  font-size: 24rpx;
+  border: 2rpx solid transparent;
+}
+
+.tag-option.active {
+  background: #fff1dc;
+  border-color: #ff9d3c;
+  color: #c66c25;
+  font-weight: 700;
+}
+
+.custom-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.custom-tag-input {
+  flex: 1;
+  height: 72rpx;
+  padding: 0 18rpx;
+  border-radius: 20rpx;
+  background: #f8f4ef;
+  font-size: 24rpx;
+}
+
+.custom-tag-btn {
+  padding: 18rpx 24rpx;
+  border-radius: 20rpx;
+  background: #fff1dc;
+  color: #c66c25;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 150rpx;
+  padding: 20rpx 22rpx;
+  box-sizing: border-box;
+  border-radius: 22rpx;
+  background: #f8f4ef;
+  line-height: 1.6;
+}
+
+.step-textarea {
+  min-height: 210rpx;
+}
+
+.small-textarea {
+  min-height: 120rpx;
+}
+
+.share-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.share-title {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.share-desc {
+  margin-top: 8rpx;
+  color: #8a8177;
+  font-size: 24rpx;
+}
+
+.submit-btn {
+  margin-top: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.center-btn {
+  text-align: center;
+}

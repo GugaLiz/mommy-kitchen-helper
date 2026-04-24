@@ -15,10 +15,25 @@
   margin-bottom: 18rpx;
 }
 
+.day-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  margin-bottom: 16rpx;
+}
+
 .day-title {
   font-size: 30rpx;
   font-weight: 700;
-  margin-bottom: 16rpx;
+}
+
+.day-swap {
+  padding: 8rpx 18rpx;
+  border: 2rpx solid rgba(255, 169, 38, 0.28);
+  background: #fff8ed;
+  color: #c66c25;
+  flex-shrink: 0;
 }
 
 .meal-line {

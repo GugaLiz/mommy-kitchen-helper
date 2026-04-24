@@ -1,0 +1,110 @@
+.family-hero {
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+}
+
+.family-hero-head {
+  gap: 18rpx;
+}
+
+.family-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18rpx;
+  margin-top: 24rpx;
+}
+
+.family-stat {
+  padding: 22rpx;
+  border-radius: 24rpx;
+  background: #fff4e5;
+}
+
+.family-stat-value {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #a8601a;
+}
+
+.family-stat-label {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #8a8177;
+  line-height: 1.6;
+}
+
+.loading-line {
+  padding: 20rpx 0;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f2eee9;
+}
+
+.member-main {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  min-width: 0;
+}
+
+.member-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: #fff4e5;
+  flex-shrink: 0;
+}
+
+.member-info {
+  min-width: 0;
+}
+
+.member-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.family-btn {
+  margin-top: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.invite-card {
+  margin-top: 18rpx;
+  padding: 24rpx;
+  border-radius: 24rpx;
+  background: #fff7ee;
+  text-align: center;
+}
+
+.invite-code {
+  font-size: 50rpx;
+  font-weight: 700;
+  letter-spacing: 8rpx;
+  color: #c66c25;
+  margin-bottom: 12rpx;
+}
+
+.invite-copy-btn {
+  margin-top: 18rpx;
+}
+
+.family-input {
+  margin-top: 6rpx;
+}
+
+.join-btn {
+  margin-top: 18rpx;
+}

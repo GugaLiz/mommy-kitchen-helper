@@ -73,20 +73,42 @@
 .plan-strip {
   padding: 28rpx;
   margin-bottom: 24rpx;
+  display: block;
+}
+
+.plan-strip-actions {
+  display: flex;
+  gap: 18rpx;
+  margin-top: 22rpx;
 }
 
 .strip-btn {
-  width: 200rpx;
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  box-sizing: border-box;
   margin: 0;
-  font-size: 26rpx;
+  font-size: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 8rpx;
+  border-radius: 20rpx;
+}
+
+.secondary-strip-btn {
+  font-size: 24rpx;
+  color: #c66c25;
+  background: #fff7eb;
+}
+
+.strip-btn.full-width {
+  width: 100%;
 }
 
 .quick-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 18rpx;
 }
 
@@ -120,4 +142,89 @@
   margin-top: 8rpx;
   color: #8a8177;
   line-height: 1.7;
+}
+
+.plan-picker-sheet {
+  max-height: 78vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-loading {
+  margin-top: 28rpx;
+  line-height: 1.7;
+}
+
+.plan-picker-scroll {
+  max-height: 48vh;
+  margin-top: 22rpx;
+}
+
+.plan-group {
+  margin-bottom: 24rpx;
+}
+
+.plan-group-title {
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.empty-picker-line {
+  padding: 18rpx 0;
+  color: #9a8f84;
+  font-size: 24rpx;
+}
+
+.plan-recipe-option {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  padding: 18rpx 20rpx;
+  margin-bottom: 12rpx;
+  border-radius: 22rpx;
+  background: #f8f4ef;
+  color: #5d554e;
+}
+
+.plan-recipe-option.active {
+  background: #fff1dc;
+  color: #c66c25;
+  font-weight: 700;
+}
+
+.plan-check {
+  width: 34rpx;
+  height: 34rpx;
+  border-radius: 50%;
+  border: 2rpx solid #ffd6a5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff9d3c;
+  flex-shrink: 0;
+}
+
+.plan-recipe-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-picker-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.plan-picker-btn {
+  flex: 1;
+  margin: 0;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }

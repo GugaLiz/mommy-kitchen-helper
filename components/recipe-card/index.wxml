@@ -1,4 +1,4 @@
-<view class="panel recipe-card" bindtap="handleTap">
+<view class="panel recipe-card {{recipe.isMine && showOwnerActions ? 'is-mine' : ''}}" bindtap="handleTap">
   <view class="recipe-cover hero-gradient">{{recipe.imageText}}</view>
   <view class="recipe-main">
     <view class="recipe-title">{{recipe.name}}</view>
@@ -7,5 +7,15 @@
       <text class="tag" wx:for="{{recipe.tags}}" wx:key="*this">{{item}}</text>
     </view>
   </view>
-  <view class="collect-mark" wx:if="{{recipe.isCollected}}">已收藏</view>
+  <view class="collect-mark" wx:if="{{recipe.isCollected && !recipe.isMine}}">已收藏</view>
+  <view class="owner-actions" wx:if="{{recipe.isMine && showOwnerActions}}">
+    <view class="owner-action edit-action" catchtap="handleEditTap">
+      <view class="owner-pencil"></view>
+      <text>编辑</text>
+    </view>
+    <view class="owner-action visibility-action {{recipe.isPublic ? 'public' : 'private'}}" catchtap="handleVisibilityTap">
+      <text class="owner-action-icon">{{recipe.isPublic ? '🔓' : '🔒'}}</text>
+      <text>{{recipe.isPublic ? '公开' : '私密'}}</text>
+    </view>
+  </view>
 </view>

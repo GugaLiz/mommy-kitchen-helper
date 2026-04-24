@@ -10,6 +10,7 @@ import * as wechatService from '../services/wechat.js'
 import * as supabaseAuthService from '../services/supabaseAuth.js'
 import { supabase } from '../lib/supabase.js'
 import { getJwtSecret } from '../lib/config.js'
+import { ensureDefaultFamilyForUser } from '../services/family.js'
 
 const router = express.Router()
 
@@ -57,6 +58,7 @@ router.post('/wechat-login', async (req, res) => {
 
     // 2. 获取或创建用户
     const user = await supabaseAuthService.getOrCreateUser(openid, userInfo)
+    const familyBundle = await ensureDefaultFamilyForUser(user)
 
     console.log(`[User] id: ${user.id}, auth_user_id: ${user.auth_user_id}`)
 
@@ -79,7 +81,9 @@ router.post('/wechat-login', async (req, res) => {
         user_id: user.id,
         auth_user_id: user.auth_user_id,
         openid: openid,
-        nickname: user.nickname || userInfo?.nickName || '用户'
+        nickname: user.nickname || userInfo?.nickName || '用户',
+        family_id: familyBundle.family.id,
+        family_role: familyBundle.member.role
       }
     })
   } catch (error) {
@@ -123,6 +127,7 @@ router.post('/dev-login', async (req, res) => {
     const user = await supabaseAuthService.getOrCreateUser(openid, {
       nickName: nickname
     })
+    const familyBundle = await ensureDefaultFamilyForUser(user)
     const token = generateCustomToken(user.id, user.auth_user_id)
 
     return res.json({
@@ -133,7 +138,9 @@ router.post('/dev-login', async (req, res) => {
         user_id: user.id,
         auth_user_id: user.auth_user_id,
         openid,
-        nickname: user.nickname || nickname
+        nickname: user.nickname || nickname,
+        family_id: familyBundle.family.id,
+        family_role: familyBundle.member.role
       }
     })
   } catch (error) {
@@ -176,12 +183,82 @@ router.get('/profile', async (req, res) => {
       })
     }
 
+    const familyBundle = await ensureDefaultFamilyForUser(data)
+
     return res.json({
       code: 0,
-      data: data
+      data: {
+        ...data,
+        family_id: familyBundle.family.id,
+        family_role: familyBundle.member.role,
+        family_name: familyBundle.family.name
+      }
     })
   } catch (error) {
     console.error('[Get Profile Error]', error)
+
+    return res.status(401).json({
+      code: 401,
+      message: 'Invalid or expired token'
+    })
+  }
+})
+
+router.put('/profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1]
+
+    if (!token) {
+      return res.status(401).json({
+        code: 401,
+        message: 'Missing authorization token'
+      })
+    }
+
+    const decoded = jwt.verify(token, getJwtSecret())
+    const payload = req.body || {}
+    const updateData = {}
+
+    if (payload.nickname !== undefined) {
+      updateData.nickname = String(payload.nickname || '').trim().slice(0, 20)
+    }
+
+    if (payload.avatarUrl !== undefined) {
+      updateData.avatar_url = payload.avatarUrl || null
+    }
+
+    if (payload.bio !== undefined) {
+      updateData.bio = payload.bio || null
+    }
+
+    if (!Object.keys(updateData).length) {
+      return res.status(400).json({
+        code: 400,
+        message: 'No profile fields to update'
+      })
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', decoded.user_id)
+      .select('*')
+      .single()
+
+    if (error || !data) {
+      return res.status(500).json({
+        code: 500,
+        message: error?.message || 'Failed to update profile'
+      })
+    }
+
+    return res.json({
+      code: 0,
+      message: 'Profile updated',
+      data
+    })
+  } catch (error) {
+    console.error('[Update Profile Error]', error)
 
     return res.status(401).json({
       code: 401,

@@ -1,0 +1,92 @@
+<view class="page-shell safe-bottom recipe-add-page">
+  <view class="panel hero-card">
+    <view class="hero-copy">
+      <view class="hero-kicker">我的原创食谱</view>
+      <view class="hero-title">{{pageTitle}}</view>
+      <view class="hero-desc">先填写名称，再选择系统推荐的食谱图标；标签可多选，也可以新增自己的标签。</view>
+    </view>
+    <view class="hero-bowl">{{form.imageText}}</view>
+  </view>
+
+  <view class="panel form-card">
+    <view class="field-group first-field">
+      <view class="field-label">食谱名称</view>
+      <input class="input field-input" value="{{form.name}}" data-field="name" bindinput="handleInput" placeholder="例如：南瓜牛肉软饭" />
+    </view>
+
+    <view class="field-group">
+      <view class="field-label">选择食谱图标</view>
+      <view class="icon-picker">
+        <view
+          class="icon-option {{form.imageText === item ? 'active' : ''}}"
+          wx:for="{{iconOptions}}"
+          wx:key="*this"
+          data-icon="{{item}}"
+          bindtap="selectIcon"
+        >
+          {{item}}
+        </view>
+      </view>
+    </view>
+
+    <view class="field-row">
+      <view class="field-group half">
+        <view class="field-label">适合月龄</view>
+        <input class="input field-input" value="{{form.ageText}}" data-field="ageText" bindinput="handleInput" placeholder="如 10月+" />
+      </view>
+      <view class="field-group half">
+        <view class="field-label">制作时间</view>
+        <input class="input field-input" value="{{form.cookingTimeText}}" data-field="cookingTimeText" bindinput="handleInput" placeholder="如 20分钟" />
+      </view>
+    </view>
+
+    <view class="field-group">
+      <view class="field-label">功效标签</view>
+      <view class="tag-picker">
+        <view
+          class="tag-option {{item.active ? 'active' : ''}}"
+          wx:for="{{tagOptions}}"
+          wx:key="value"
+          data-value="{{item.value}}"
+          bindtap="toggleTag"
+        >
+          {{item.value}}
+        </view>
+      </view>
+      <view class="custom-tag-row">
+        <input class="custom-tag-input" value="{{newTag}}" bindinput="handleNewTagInput" placeholder="输入自定义标签，如 补锌" />
+        <view class="custom-tag-btn" bindtap="addCustomTag">添加</view>
+      </view>
+    </view>
+
+    <view class="field-group">
+      <view class="field-label">主要食材</view>
+      <textarea class="textarea" value="{{form.ingredientsText}}" data-field="ingredientsText" bindinput="handleInput" placeholder="一行一个食材，例如：&#10;南瓜 50g&#10;牛肉 30g&#10;米饭 半碗" />
+    </view>
+
+    <view class="field-group">
+      <view class="field-label">制作步骤</view>
+      <textarea class="textarea step-textarea" value="{{form.stepsText}}" data-field="stepsText" bindinput="handleInput" placeholder="一行一个步骤，例如：&#10;1. 南瓜蒸熟压泥&#10;2. 牛肉剁碎焯水&#10;3. 一起小火煮软" />
+    </view>
+
+    <view class="field-group">
+      <view class="field-label">小贴士</view>
+      <textarea class="textarea small-textarea" value="{{form.tips}}" data-field="tips" bindinput="handleInput" placeholder="可选，例如：牛肉尽量剁细，按宝宝咀嚼能力调整颗粒。" />
+    </view>
+
+    <view class="field-group">
+      <view class="field-label">营养说明</view>
+      <textarea class="textarea small-textarea" value="{{form.nutritionInfo}}" data-field="nutritionInfo" bindinput="handleInput" placeholder="可选，例如：补充蛋白质和碳水，适合午餐。" />
+    </view>
+  </view>
+
+  <view class="panel share-card">
+    <view>
+      <view class="share-title">公开分享</view>
+      <view class="share-desc">关闭后仅自己可见；开启后会带“公开”标识</view>
+    </view>
+    <switch checked="{{form.isPublic}}" bindchange="togglePublic" color="#ff9d3c" />
+  </view>
+
+  <button class="primary-btn submit-btn center-btn" loading="{{saving}}" bindtap="submitRecipe">{{mode === 'edit' ? '保存修改' : '保存食谱'}}</button>
+</view>

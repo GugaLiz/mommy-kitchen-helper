@@ -17,12 +17,23 @@ router.get('/history', async (req, res) => {
       })
     }
 
-    const { data: baby, error: babyError } = await supabase
+    let babyQuery = supabase
       .from('babies')
       .select('id')
       .eq('id', babyId)
-      .eq('user_id', req.user.id)
-      .single()
+    babyQuery = req.family?.id ? babyQuery.eq('family_id', req.family.id) : babyQuery.eq('user_id', req.user.id)
+    let { data: baby, error: babyError } = await babyQuery.maybeSingle()
+
+    if ((!baby || babyError) && req.family?.id) {
+      const fallback = await supabase
+        .from('babies')
+        .select('id, family_id')
+        .eq('id', babyId)
+        .eq('user_id', req.user.id)
+        .maybeSingle()
+      baby = fallback.data
+      babyError = fallback.error
+    }
 
     if (babyError || !baby) {
       return res.status(404).json({
@@ -31,13 +42,26 @@ router.get('/history', async (req, res) => {
       })
     }
 
-    const { data: records, error } = await supabase
+    let recordQuery = supabase
       .from('growth_records')
       .select('*')
       .eq('baby_id', babyId)
-      .eq('user_id', req.user.id)
       .order('measured_date', { ascending: false })
       .limit(Number(limit))
+    recordQuery = req.family?.id ? recordQuery.eq('family_id', req.family.id) : recordQuery.eq('user_id', req.user.id)
+    let { data: records, error } = await recordQuery
+
+    if (!error && req.family?.id && (!records || !records.length)) {
+      const fallback = await supabase
+        .from('growth_records')
+        .select('*')
+        .eq('baby_id', babyId)
+        .eq('user_id', req.user.id)
+        .order('measured_date', { ascending: false })
+        .limit(Number(limit))
+      records = fallback.data || []
+      error = fallback.error
+    }
 
     if (error) throw error
 
@@ -69,12 +93,23 @@ router.post('/add', async (req, res) => {
       })
     }
 
-    const { data: baby, error: babyError } = await supabase
+    let babyQuery = supabase
       .from('babies')
       .select('id')
       .eq('id', payload.baby_id)
-      .eq('user_id', req.user.id)
-      .single()
+    babyQuery = req.family?.id ? babyQuery.eq('family_id', req.family.id) : babyQuery.eq('user_id', req.user.id)
+    let { data: baby, error: babyError } = await babyQuery.maybeSingle()
+
+    if ((!baby || babyError) && req.family?.id) {
+      const fallback = await supabase
+        .from('babies')
+        .select('id, family_id')
+        .eq('id', payload.baby_id)
+        .eq('user_id', req.user.id)
+        .maybeSingle()
+      baby = fallback.data
+      babyError = fallback.error
+    }
 
     if (babyError || !baby) {
       return res.status(404).json({
@@ -89,6 +124,7 @@ router.post('/add', async (req, res) => {
         {
           baby_id: payload.baby_id,
           user_id: req.user.id,
+          family_id: req.family?.id || baby.family_id || null,
           measured_date: payload.measured_date,
           height: payload.height,
           weight: payload.weight

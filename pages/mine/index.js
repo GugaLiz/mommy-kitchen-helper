@@ -1,4 +1,5 @@
 const api = require('../../utils/api')
+const { ensurePersistableAvatar } = require('../../utils/avatar')
 
 Page({
   data: {
@@ -15,7 +16,7 @@ Page({
   },
 
   onShow() {
-    api.getOverview().then(overview => {
+    api.getOverview().then((overview) => {
       this.setData({
         user: overview.user,
         babies: overview.babies,
@@ -42,12 +43,31 @@ Page({
     wx.chooseImage({
       count: 1,
       sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
       success: (res) => {
         this.setData({
           'profileForm.avatarImage': res.tempFilePaths[0]
         })
+      },
+      fail: () => {
+        wx.showToast({
+          title: '未选择头像',
+          icon: 'none'
+        })
       }
     })
+  },
+
+  handleChooseAvatar(event) {
+    const avatarUrl = event.detail && event.detail.avatarUrl
+    if (avatarUrl) {
+      this.setData({
+        'profileForm.avatarImage': avatarUrl
+      })
+      return
+    }
+
+    this.chooseAvatar()
   },
 
   editNickname() {
@@ -78,10 +98,24 @@ Page({
     })
   },
 
-  saveProfile() {
-    api.saveUserProfile(this.data.profileForm).then((user) => {
+  async saveProfile() {
+    let avatarImage = this.data.profileForm.avatarImage
+    try {
+      avatarImage = await ensurePersistableAvatar(avatarImage)
+    } catch (error) {
+      wx.showToast({ title: '头像处理失败，请重新选择', icon: 'none' })
+      return
+    }
+
+    const profileForm = {
+      ...this.data.profileForm,
+      avatarImage
+    }
+
+    api.saveUserProfile(profileForm).then((user) => {
       this.setData({
         user,
+        profileForm,
         showProfileEditor: false
       })
       wx.showToast({ title: '资料已更新', icon: 'success' })
@@ -99,12 +133,16 @@ Page({
     wx.navigateTo({ url: '/pages/baby-edit/index?mode=create' })
   },
 
+  openFamily() {
+    wx.navigateTo({ url: '/pages/family/index' })
+  },
+
   editBaby(event) {
     wx.navigateTo({ url: `/pages/baby-edit/index?id=${event.currentTarget.dataset.id}&mode=edit` })
   },
 
   showCacheNotice() {
-    wx.showToast({ title: '当前为本地模拟数据', icon: 'none' })
+    wx.showToast({ title: '当前为真实接口联调', icon: 'none' })
   },
 
   showFeedback() {

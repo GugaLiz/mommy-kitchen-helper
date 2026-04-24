@@ -4,6 +4,9 @@
   </view>
 
   <view class="detail-title">{{recipe.name}}</view>
+  <view class="detail-visibility {{recipe.isPublic ? 'public' : 'private'}}" wx:if="{{recipe.isMine}}">
+    {{recipe.isPublic ? '我的食谱 · 公开' : '我的食谱 · 私密'}}
+  </view>
   <view class="detail-meta">★ {{recipe.rating}} · {{recipe.madeCount}}人做过 · {{recipe.cookingTime}}分钟</view>
   <view class="detail-tag-list">
     <text class="tag">{{recipe.ageLabel}}</text>
@@ -30,7 +33,6 @@
       <text class="step-index">{{index + 1}}</text>
       <text class="step-text">{{item}}</text>
     </view>
-    <view class="video-link">{{recipe.videoLabel}}</view>
   </view>
 
   <view class="panel detail-card">

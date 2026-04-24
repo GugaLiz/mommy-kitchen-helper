@@ -1,5 +1,10 @@
 const api = require('../../utils/api')
 const store = require('../../utils/store')
+const { ensurePersistableAvatar } = require('../../utils/avatar')
+
+function getDefaultAvatar(gender) {
+  return gender === '女' ? '/assets/avatars/girl-q.svg' : '/assets/avatars/boy-q.svg'
+}
 
 Page({
   data: {
@@ -31,13 +36,18 @@ Page({
       mode,
       modeTitle: mode === 'create' ? '创建宝宝档案' : '编辑宝宝档案'
     }
+
     if (options.id) {
       const state = store.getState()
       const target = state.babies.find(item => item.id === options.id)
       if (target) {
-        nextData.form = { ...target }
+        nextData.form = {
+          ...target,
+          avatarImage: target.avatarImage || getDefaultAvatar(target.gender)
+        }
       }
     }
+
     this.setData(nextData, () => this.refreshOptionStates())
   },
 
@@ -56,9 +66,44 @@ Page({
 
   selectGender(event) {
     const gender = event.currentTarget.dataset.value
+    const currentAvatar = this.data.form.avatarImage
+    const previousDefault = getDefaultAvatar(this.data.form.gender)
+    const nextDefault = getDefaultAvatar(gender)
+
     this.setData({
       'form.gender': gender,
-      'form.avatarImage': gender === '女' ? '/assets/avatars/girl-q.svg' : '/assets/avatars/boy-q.svg'
+      'form.avatarImage': currentAvatar === previousDefault ? nextDefault : currentAvatar
+    })
+  },
+
+  handleChooseAvatar(event) {
+    const avatarUrl = event.detail && event.detail.avatarUrl
+    if (avatarUrl) {
+      this.setData({
+        'form.avatarImage': avatarUrl
+      })
+      return
+    }
+
+    this.chooseAvatar()
+  },
+
+  chooseAvatar() {
+    wx.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        this.setData({
+          'form.avatarImage': res.tempFilePaths[0]
+        })
+      },
+      fail: () => {
+        wx.showToast({
+          title: '未选择头像',
+          icon: 'none'
+        })
+      }
     })
   },
 
@@ -113,11 +158,13 @@ Page({
   confirmAddAllergy() {
     const value = (this.data.newAllergy || '').trim()
     if (!value) return
+
     if (this.data.allergySource.includes(value)) {
       this.toggleArrayField('allergies', value)
       this.setData({ addingAllergy: false, newAllergy: '' })
       return
     }
+
     this.setData({
       allergySource: this.data.allergySource.concat(value),
       'form.allergies': this.data.form.allergies.concat(value),
@@ -129,11 +176,13 @@ Page({
   confirmAddPreference() {
     const value = (this.data.newPreference || '').trim()
     if (!value) return
+
     if (this.data.preferenceSource.includes(value)) {
       this.toggleArrayField('dietaryPreferences', value)
       this.setData({ addingPreference: false, newPreference: '' })
       return
     }
+
     this.setData({
       preferenceSource: this.data.preferenceSource.concat(value),
       'form.dietaryPreferences': this.data.form.dietaryPreferences.concat(value),
@@ -142,15 +191,26 @@ Page({
     }, () => this.refreshOptionStates())
   },
 
-  saveBaby() {
+  async saveBaby() {
     if (!this.data.form.nickname || !this.data.form.birthDate) {
       wx.showToast({ title: '请填写昵称和出生日期', icon: 'none' })
       return
     }
+
+    let avatarImage = this.data.form.avatarImage
+    try {
+      avatarImage = await ensurePersistableAvatar(avatarImage)
+    } catch (error) {
+      wx.showToast({ title: '头像处理失败，请重新选择', icon: 'none' })
+      return
+    }
+
     const payload = {
       ...this.data.form,
+      avatarImage,
       active: true
     }
+
     api.saveBaby(payload).then(() => {
       wx.showToast({ title: '保存成功', icon: 'success' })
       setTimeout(() => {

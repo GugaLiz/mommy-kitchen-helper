@@ -1,4 +1,5 @@
-const whoData = require('./who-lhfa-data')
+const lengthHeightData = require('./who-lhfa-data')
+const weightData = require('./who-wfa-data')
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const AVG_MONTH_DAYS = 30.4375
@@ -65,8 +66,9 @@ function interpolateEntry(entries, day) {
   }
 }
 
-function getReferenceByDay(gender, day) {
-  return interpolateEntry(whoData[normalizeGender(gender)], day)
+function getReferenceByDay(gender, day, type = 'height') {
+  const source = type === 'weight' ? weightData : lengthHeightData
+  return interpolateEntry(source[normalizeGender(gender)], day)
 }
 
 function erf(x) {
@@ -183,31 +185,32 @@ function buildPositionedPoints(rawPoints, domain) {
   })
 }
 
-function getPercentileInfo(baby, record) {
+function getPercentileInfo(baby, record, type = 'height') {
   if (!baby || !record) {
     return {
       percentile: 50,
       percentileText: 'P50 分位',
       zScore: 0,
-      measureLabel: '身高'
+      measureLabel: type === 'weight' ? '体重' : '身高'
     }
   }
 
   const ageDays = getAgeDays(baby.birthDate, record.measuredDate)
-  const reference = getReferenceByDay(baby.gender, ageDays)
-  const zScore = getZScore(Number(record.height), reference)
+  const reference = getReferenceByDay(baby.gender, ageDays, type)
+  const value = type === 'weight' ? Number(record.weight) : Number(record.height)
+  const zScore = getZScore(value, reference)
   const percentile = clamp(Math.round(normalCdf(zScore) * 100), 1, 99)
 
   return {
     percentile,
     percentileText: `P${percentile} 分位`,
     zScore,
-    measureLabel: getMeasureLabel(ageDays),
+    measureLabel: type === 'weight' ? '体重' : getMeasureLabel(ageDays),
     ageDays
   }
 }
 
-function buildHeightChartData(baby, records = []) {
+function buildStandardChartData(baby, records = [], type = 'height') {
   if (!baby || !records.length) {
     return null
   }
@@ -215,12 +218,14 @@ function buildHeightChartData(baby, records = []) {
   const sorted = records.slice().sort((a, b) => new Date(a.measuredDate) - new Date(b.measuredDate))
   const measuredPoints = sorted.map(item => {
     const day = getAgeDays(baby.birthDate, item.measuredDate)
+    const value = type === 'weight' ? Number(item.weight) : Number(item.height)
     return {
       day,
-      value: Number(item.height),
+      value,
       label: formatAgeTick(getCompletedMonths(baby.birthDate, item.measuredDate)),
       measuredDate: item.measuredDate,
-      height: item.height
+      height: item.height,
+      weight: item.weight
     }
   })
 
@@ -240,9 +245,9 @@ function buildHeightChartData(baby, records = []) {
     sampleDays.push(Math.round(maxDay))
   }
 
-  const ref3 = sampleDays.map(day => ({ day, value: getReferenceByDay(baby.gender, day).P3 }))
-  const ref50 = sampleDays.map(day => ({ day, value: getReferenceByDay(baby.gender, day).P50 }))
-  const ref97 = sampleDays.map(day => ({ day, value: getReferenceByDay(baby.gender, day).P97 }))
+  const ref3 = sampleDays.map(day => ({ day, value: getReferenceByDay(baby.gender, day, type).P3 }))
+  const ref50 = sampleDays.map(day => ({ day, value: getReferenceByDay(baby.gender, day, type).P50 }))
+  const ref97 = sampleDays.map(day => ({ day, value: getReferenceByDay(baby.gender, day, type).P97 }))
 
   const allValues = measuredPoints.map(item => item.value)
     .concat(ref3.map(item => item.value))
@@ -251,7 +256,7 @@ function buildHeightChartData(baby, records = []) {
 
   const rawMin = Math.min(...allValues)
   const rawMax = Math.max(...allValues)
-  const yStep = rawMax - rawMin > 25 ? 10 : 5
+  const yStep = type === 'weight' ? (rawMax - rawMin > 8 ? 2 : 1) : (rawMax - rawMin > 25 ? 10 : 5)
   const minValue = Math.floor((rawMin - yStep) / yStep) * yStep
   const maxValue = Math.ceil((rawMax + yStep) / yStep) * yStep
 
@@ -288,9 +293,9 @@ function buildHeightChartData(baby, records = []) {
   const latestAgeDays = measuredPoints[measuredPoints.length - 1].day
 
   return {
-    title: `${getMeasureLabel(latestAgeDays)}曲线`,
-    unit: 'cm',
-    measureLabel: getMeasureLabel(latestAgeDays),
+    title: type === 'weight' ? '体重曲线' : `${getMeasureLabel(latestAgeDays)}曲线`,
+    unit: type === 'weight' ? 'kg' : 'cm',
+    measureLabel: type === 'weight' ? '体重' : getMeasureLabel(latestAgeDays),
     xTicks,
     yTicks,
     bandColumns: buildBandColumns(series97, series3),
@@ -331,11 +336,20 @@ function buildHeightChartData(baby, records = []) {
   }
 }
 
+function buildHeightChartData(baby, records = []) {
+  return buildStandardChartData(baby, records, 'height')
+}
+
+function buildWeightChartData(baby, records = []) {
+  return buildStandardChartData(baby, records, 'weight')
+}
+
 module.exports = {
   getAgeDays,
   getCompletedMonths,
   getMeasureLabel,
   getReferenceByDay,
   getPercentileInfo,
-  buildHeightChartData
+  buildHeightChartData,
+  buildWeightChartData
 }
