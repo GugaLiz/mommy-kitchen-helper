@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+.env
+.env.*
+smoke-server.err.log
+smoke-server.out.log
+.git
+.gitignore
+README.md

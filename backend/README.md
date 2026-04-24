@@ -17,8 +17,8 @@ WECHAT_APP_SECRET=your_app_secret_here
 JWT_SECRET=your_jwt_secret_key_here
 
 # 服务器配置
-PORT=3000
-CORS_ORIGIN=http://localhost:3000
+PORT=3333
+CORS_ORIGIN=http://localhost:3333
 NODE_ENV=development
 
 # 开发调试开关（生产环境务必关闭）
@@ -46,7 +46,7 @@ npm install
 npm run dev
 ```
 
-服务器将在 `http://localhost:3000` 启动
+服务器将在 `http://localhost:3333` 启动
 
 ### 4. 运行 smoke test
 
@@ -291,9 +291,73 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 COPY . .
-EXPOSE 3000
+EXPOSE 3333
 CMD ["npm", "start"]
 ```
+
+### 推荐发布步骤（当前项目可直接执行）
+
+#### 1. 准备生产环境变量
+
+在部署平台中配置：
+
+```bash
+SUPABASE_URL=你的 Supabase URL
+SUPABASE_SERVICE_ROLE_KEY=你的 service role key
+WECHAT_APP_ID=你的小程序 AppID
+WECHAT_APP_SECRET=你的小程序 AppSecret
+JWT_SECRET=一串足够长的随机密钥
+PORT=3333
+NODE_ENV=production
+DEV_LOGIN_ENABLED=false
+```
+
+如果部署平台需要额外配置允许来源，可再补：
+
+```bash
+CORS_ORIGIN=https://你的后端域名
+```
+
+#### 2. 构建并启动 Docker
+
+```bash
+cd backend
+docker build -t mommy-kitchen-helper-api .
+docker run -d \
+  --name mommy-kitchen-helper-api \
+  -p 3333:3333 \
+  --env-file .env \
+  mommy-kitchen-helper-api
+```
+
+#### 3. 检查服务是否启动成功
+
+```bash
+curl http://127.0.0.1:3333/health
+```
+
+返回：
+
+```json
+{ "status": "ok" }
+```
+
+#### 4. 小程序联调时需要同步修改
+
+- 小程序请求地址改成你部署后的 HTTPS 域名，例如：
+  `https://api.your-domain.com/api`
+- 在微信公众平台的小程序后台，把该域名加入：
+  - `request 合法域名`
+- 如果你要测试登录、复制、头像上传等能力，也要确保对应隐私协议和域名配置已同步完成
+
+#### 5. 发布前检查清单
+
+- `DEV_LOGIN_ENABLED=false`
+- 线上环境变量已完整配置
+- Supabase migration 已全部执行
+- `https://你的域名/health` 可访问
+- 小程序 `request` 合法域名已配置
+- 小程序隐私协议已更新
 
 ## 安全注意事项
 

@@ -20,7 +20,7 @@ export function createApp() {
 
   // 中间件
   app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3333',
     credentials: true
   }))
   app.use(express.json({ limit: '10mb' }))
@@ -59,7 +59,7 @@ export function createApp() {
   return app
 }
 
-export function startServer(port = process.env.PORT || 3000) {
+export function startServer(port = process.env.PORT || 3333) {
   const app = createApp()
   return app.listen(port, () => {
     console.log(`🚀 Server running on http://localhost:${port}`)

@@ -1,7 +1,7 @@
 const store = require('./store')
 const { isPersistableAvatar } = require('./avatar')
 
-const DEFAULT_API_BASE_URL = 'http://127.0.0.1:3000/api'
+const DEFAULT_API_BASE_URL = 'http://127.0.0.1:3333/api'
 const MOCK_CONFIG_KEY = 'mock_api_enabled'
 const DEFAULT_MOCK_API_ENABLED = false
 const DEV_LOGIN_CONFIG_KEY = 'dev_login_enabled'

@@ -89,10 +89,12 @@ Page({
           icon: 'success'
         })
       },
-      fail: () => {
-        wx.showToast({
-          title: '复制失败，请重试',
-          icon: 'none'
+      fail: (error) => {
+        console.error('[family] copy invite failed', error)
+        wx.showModal({
+          title: '复制失败',
+          content: `当前环境暂时无法写入剪贴板。\n邀请码：${code}\n\n请先手动复制使用。`,
+          showCancel: false
         })
       }
     })

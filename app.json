@@ -14,6 +14,11 @@
     "pages/agreement-privacy/index"
   ],
   "__usePrivacyCheck__": true,
+  "permission": {
+    "scope.writeClipboard": {
+      "desc": "用于复制家庭邀请码等文本内容"
+    }
+  },
   "window": {
     "navigationBarTitleText": "育儿助手",
     "navigationBarBackgroundColor": "#FFF7EE",

@@ -7,7 +7,7 @@ Postman 快速使用
    local-dev.postman_environment.json
 
 3. 选择环境并修改变量
-   - baseUrl: 本地默认 http://localhost:3000
+   - baseUrl: 本地默认 http://localhost:3333
    - wxCode: 替换为小程序 wx.login 获取的 code
    - devOpenid: 本地开发登录用标识，固定值可复用同一测试账号
 
