@@ -89,8 +89,10 @@ router.post('/wechat-login', async (req, res) => {
   } catch (error) {
     console.error('[WeChat Login Error]', error)
 
-    return res.status(500).json({
-      code: 500,
+    const status = error.status || 500
+
+    return res.status(status).json({
+      code: status,
       message: error.message || 'Internal server error'
     })
   }

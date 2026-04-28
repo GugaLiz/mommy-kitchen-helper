@@ -8,12 +8,32 @@ import crypto from 'node:crypto'
 
 const WECHAT_API_BASE = 'https://api.weixin.qq.com'
 
+export class WeChatApiError extends Error {
+  constructor(message, status = 502, details = {}) {
+    super(message)
+    this.name = 'WeChatApiError'
+    this.status = status
+    this.details = details
+  }
+}
+
+function isPlaceholder(value) {
+  return !value || value.includes('your_') || value.endsWith('_here')
+}
+
 /**
  * 用微信 code 换取 session key 和 openid
  * 文档: https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/login/code2Session.html
  */
 export async function code2Session(code) {
   try {
+    if (isPlaceholder(process.env.WECHAT_APP_ID) || isPlaceholder(process.env.WECHAT_APP_SECRET)) {
+      throw new WeChatApiError(
+        'WeChat login is not configured. Please set WECHAT_APP_ID and WECHAT_APP_SECRET in backend/.env.',
+        503
+      )
+    }
+
     const response = await axios.get(`${WECHAT_API_BASE}/sns/jscode2session`, {
       params: {
         appid: process.env.WECHAT_APP_ID,
@@ -25,7 +45,13 @@ export async function code2Session(code) {
 
     // 微信返回错误
     if (response.data.errcode) {
-      throw new Error(`WeChat error: ${response.data.errmsg}`)
+      const message = response.data.errmsg || 'Unknown WeChat API error'
+      const status = ['invalid appid', 'invalid appsecret'].some(item => message.includes(item)) ? 503 : 400
+
+      throw new WeChatApiError(`WeChat code2Session failed: ${message}`, status, {
+        errcode: response.data.errcode,
+        errmsg: response.data.errmsg
+      })
     }
 
     return {
@@ -35,7 +61,11 @@ export async function code2Session(code) {
     }
   } catch (error) {
     console.error('WeChat code2Session error:', error.message)
-    throw new Error('Failed to exchange code for session')
+    if (error instanceof WeChatApiError) {
+      throw error
+    }
+
+    throw new WeChatApiError('Failed to exchange code for session', 502)
   }
 }
 
